@@ -99,6 +99,6 @@ Route::group([
     'middleware' => 'auth.token.app',
 ], function () {
     Route::any('{path?}', function () {
-        return view('main');
+        return new JsonResponse('Not found.', Response::NOT_FOUND);
     })->where('path', '.+');
 });
