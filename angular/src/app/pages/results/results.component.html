@@ -1,0 +1,138 @@
+<div class="grid-x">
+    <div class="cell large-12">
+        <h1 *ngIf="!editResults">Resultaten toevoegen</h1>
+        <h1 *ngIf="editResults">Resultaten wijzigen</h1>
+        <div class="add-results">
+            <span>Resultaten wijzigen</span>
+            <div class="switch large">
+                <input
+                    id="add-edit"
+                    class="switch-input"
+                    type="checkbox"
+                    [ngModel]="editResults"
+                    (ngModelChange)="getEvents($event)"
+                />
+                <label for="add-edit" class="switch-paddle">
+                    <span class="show-for-sr">Resultaten wijzigen</span>
+                    <span class="switch-active" aria-hidden="true">Ja</span>
+                    <span class="switch-inactive" aria-hidden="true">Nee</span>
+                </label>
+            </div>
+
+            <div class="">
+                <label>Match</label>
+                <select
+                    [ngModel]="index"
+                    (ngModelChange)="selectEvent($event, i)"
+                >
+                    <option
+                        value="{{ i }}"
+                        name="event"
+                        *ngFor="let event of events; let i = index"
+                    >
+                        <span
+                            >{{ event.id }}. {{ event.name }} ({{
+                                event.start | date: 'dd-MM-yyyy HH:mm:ss'
+                            }}):
+                        </span>
+                        <span
+                            >{{ event.event_teams[0]?.team.name }} -
+                            {{ event.event_teams[1]?.team.name }}</span
+                        >
+                    </option>
+                </select>
+                <span class="field-note"
+                    >Resultaten kunnen alleen toegevoegd/gewijzigd worden voor
+                    matches die maximaal 7 dagen geleden zijn aangemaakt.</span
+                >
+            </div>
+
+            <div class="">
+                <label>Team 1: {{ team1Name }}</label>
+                <div class="input-group">
+                    <span class="input-group-label">Teamscore</span>
+                    <input
+                        type="text"
+                        class="input-group-field"
+                        name="score-team-1"
+                        [(ngModel)]="results.scoreTeam1"
+                    />
+                </div>
+
+                <div class="input-group">
+                    <span class="input-group-label">Kruipscore</span>
+                    <input
+                        type="text"
+                        class="input-group-field"
+                        name="crawls-team-1"
+                        [(ngModel)]="results.crawlsTeam1"
+                    />
+                </div>
+            </div>
+
+            <div class="">
+                <label>Team 2: {{ team2Name }}</label>
+                <div class="input-group">
+                    <span class="input-group-label">Teamscore</span>
+                    <input
+                        type="text"
+                        class="input-group-field"
+                        name="score-team-2"
+                        [(ngModel)]="results.scoreTeam2"
+                    />
+                </div>
+
+                <div class="input-group">
+                    <span class="input-group-label">Kruipscore</span>
+                    <input
+                        type="text"
+                        class="input-group-field"
+                        name="crawls-team-2"
+                        [(ngModel)]="results.crawlsTeam2"
+                    />
+                </div>
+            </div>
+
+            <div class="">
+                <label>Commentaar</label>
+                <textarea
+                    name="note"
+                    id="note"
+                    [(ngModel)]="results.note"
+                ></textarea>
+            </div>
+
+            <div class="">
+                <a
+                    class="success button"
+                    [ngClass]="{ disabled: loading }"
+                    (click)="saveResults()"
+                    >Opslaan</a
+                >
+                <a
+                    class="alert button"
+                    [ngClass]="{ disabled: loading }"
+                    (click)="deleteResults()"
+                    *ngIf="editResults"
+                    >Resultaten verwijderen</a
+                >
+            </div>
+
+            <div
+                class="success callout"
+                [innerHTML]="resResult.msg"
+                *ngIf="resResult.success"
+            ></div>
+            <div class="alert callout" *ngIf="resResult.error">
+                <div>
+                    {{ resResult.msg }}
+                </div>
+                <div *ngFor="let errorType of resResult.errors">
+                    <span *ngFor="let error of errorType">
+                        {{ error }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

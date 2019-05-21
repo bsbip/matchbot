@@ -1,0 +1,62 @@
+<header>
+    <div class="grid-container">
+        <div>
+            <nav class="nav">
+                <ul class="vertical medium-horizontal menu">
+                    <li class="menu-text">
+                        <a
+                            [routerLink]="[baseUrl + '/']"
+                            routerLinkActive="active"
+                            ><img
+                                [src]="
+                                    baseUrl + '/assets/img/matchbot-icon.jpg'
+                                "
+                                alt="Matchbot"
+                            />
+                            Matchbot</a
+                        >
+                    </li>
+                    <li>
+                        <a
+                            [routerLink]="[baseUrl + '/players']"
+                            routerLinkActive="active"
+                            >Spelers</a
+                        >
+                    </li>
+                    <li>
+                        <a
+                            [routerLink]="[baseUrl + '/match']"
+                            routerLinkActive="active"
+                            >Match aanmaken</a
+                        >
+                    </li>
+                    <li>
+                        <a
+                            [routerLink]="[baseUrl + '/results']"
+                            routerLinkActive="active"
+                            >Resultaten toevoegen</a
+                        >
+                    </li>
+                    <li>
+                        <a
+                            [routerLink]="[baseUrl + '/stats']"
+                            routerLinkActive="active"
+                            >Statistieken</a
+                        >
+                    </li>
+                    <li>
+                        <a
+                            [routerLink]="[baseUrl + '/standings']"
+                            routerLinkActive="active"
+                            >Standen</a
+                        >
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</header>
+
+<div class="grid-container">
+    <router-outlet></router-outlet>
+</div>

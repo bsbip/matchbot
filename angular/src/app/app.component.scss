@@ -1,0 +1,23 @@
+header {
+    padding: 10px 0px 10px 0px;
+
+    li:not(.menu-text) {
+        margin-top: 19px;
+    }
+
+    li {
+        a {
+            color: #313355;
+        }
+    }
+
+    .menu {
+        .menu-text {
+            font-weight: normal;
+
+            a {
+                color: #000;
+            }
+        }
+    }
+}

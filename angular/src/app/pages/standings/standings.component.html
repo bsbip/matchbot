@@ -1,0 +1,76 @@
+<div class="grid-x">
+    <div class="cell large-12">
+        <h1>Standen</h1>
+        <div>
+            <div class="results">
+                <div class="grid-x grid-margin-x">
+                    <div class="cell large-4">
+                        <label>Periode</label>
+                        <select
+                            [ngModel]="periodFilter"
+                            (ngModelChange)="getDuoStats($event, sortFilter)"
+                        >
+                            <option
+                                value="{{ period.code }}"
+                                name="period"
+                                *ngFor="let period of periods"
+                            >
+                                <span>{{ period.name }}</span>
+                            </option>
+                        </select>
+                    </div>
+                    <div class="cell large-4">
+                        <label>Sorteren</label>
+                        <select
+                            [ngModel]="sortFilter"
+                            (ngModelChange)="getDuoStats(periodFilter, $event)"
+                        >
+                            <option
+                                value="{{ sort.code }}"
+                                name="sort"
+                                *ngFor="let sort of sorts"
+                            >
+                                <span>{{ sort.name }}</span>
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <table *ngIf="!resResult.error">
+                    <caption>
+                        Stand per team
+                    </caption>
+                    <thead>
+                        <th>Nr.</th>
+                        <th>Team</th>
+                        <th>Matches</th>
+                        <th>Gewonnen</th>
+                        <th>Verloren</th>
+                        <th>Win/verlies ratio</th>
+                        <th>Teamscore</th>
+                        <th>Gemiddelde teamscore</th>
+                        <th>Kruipscore</th>
+                        <th>Gemiddelde kruipscore</th>
+                    </thead>
+                    <tr *ngFor="let team of data; let i = index">
+                        <td>{{ i + 1 }}</td>
+                        <td>{{ team.name }}</td>
+                        <td>{{ team.totalgames }}</td>
+                        <td>{{ team.won }}</td>
+                        <td>{{ team.lost }}</td>
+                        <td>{{ team.winlose }}</td>
+                        <td>{{ team.totalscore }}</td>
+                        <td>{{ team.avgscore }}/match</td>
+                        <td>{{ team.crawlscore }}</td>
+                        <td>{{ team.avgcrawlscore }}/match</td>
+                    </tr>
+                </table>
+
+                <div class="alert callout" *ngIf="resResult.error">
+                    <div>
+                        {{ resResult.msg }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

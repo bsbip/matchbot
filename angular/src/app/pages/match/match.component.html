@@ -1,0 +1,111 @@
+<div class="grid-x">
+    <div class="cell large-12">
+        <h1>Match aanmaken</h1>
+        <label>Type match</label>
+        <select
+            [ngModel]="selectedMatchType"
+            (ngModelChange)="selectMatchType($event)"
+        >
+            <option
+                [ngValue]="matchType.code_name"
+                *ngFor="let matchType of matchTypes"
+            >
+                <span [textContent]="matchType.name"></span>
+            </option>
+        </select>
+
+        <div class="" *ngIf="selectedMatchType == 'random'">
+            <table>
+                <caption>
+                    Potentiële spelers kiezen
+                </caption>
+                <thead>
+                    <th>Speler</th>
+                    <th class="hide-for-small-only">Standaardspeler</th>
+                </thead>
+                <tbody>
+                    <tr
+                        class="cursor-pointer"
+                        [ngClass]="{
+                            'selected-player':
+                                selectedPlayers.indexOf(user.id) > -1
+                        }"
+                        *ngFor="let user of users"
+                        (click)="changeSelectedPlayers(user.id)"
+                    >
+                        <td>
+                            <img [src]="user.profile.image_32" alt="Speler" />
+                            <span>{{ user.real_name }} (@{{ user.name }})</span>
+                        </td>
+                        <td class="hide-for-small-only">
+                            <span *ngIf="user.default">Ja</span>
+                            <span *ngIf="!user.default">Nee</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div *ngIf="selectedMatchType == 'manually'">
+            <div
+                class=""
+                *ngFor="let matchPlayer of matchPlayers; let i = index"
+            >
+                <label>Team {{ i + 1 <= 2 ? 1 : 2 }}: speler {{ i + 1 }}</label>
+                <select
+                    [ngModel]="matchPlayers[i]"
+                    (ngModelChange)="selectPlayer($event, i)"
+                >
+                    <option
+                        [ngValue]="user"
+                        name="event"
+                        *ngFor="let user of users; let i = index"
+                    >
+                        <span
+                            ><img
+                                [src]="user.profile.image_32"
+                                alt="{{ user.real_name }}"
+                            />
+                            {{ user.real_name }} (@{{ user.name }})</span
+                        >
+                    </option>
+                </select>
+            </div>
+        </div>
+
+        <div class="btn-create">
+            <a
+                class="success button"
+                [ngClass]="{ disabled: loading }"
+                (click)="createMatch()"
+                *ngIf="selectedMatchType == 'manually'"
+            >
+                Aanmaken
+            </a>
+            <a
+                class="success button"
+                [ngClass]="{ disabled: loading || !createMatchAllowed }"
+                (click)="createRandomMatch()"
+                *ngIf="selectedMatchType == 'random'"
+            >
+                Aanmaken
+            </a>
+        </div>
+
+        <div
+            class="success callout"
+            [innerHTML]="resResult.msg"
+            *ngIf="resResult.success"
+        ></div>
+        <div class="alert callout" *ngIf="resResult.error">
+            <div>
+                {{ resResult.msg }}
+            </div>
+            <div *ngFor="let errorType of resResult.errors">
+                <span *ngFor="let error of errorType">
+                    {{ error }}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>

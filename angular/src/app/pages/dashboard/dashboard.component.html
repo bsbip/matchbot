@@ -1,0 +1,61 @@
+<div>
+    <div class="grid-x">
+        <div class="cell large-12">
+            <h1>Overzicht</h1>
+            <div>
+                <div class="results">
+                    <table>
+                        <caption>
+                            Matches
+                        </caption>
+                        <thead>
+                            <th>ID</th>
+                            <th>Naam</th>
+                            <th>Datum/tijd</th>
+                            <th>Team 1</th>
+                            <th>Team 2</th>
+                            <th>Score</th>
+                            <th>Kruipscore</th>
+                            <th>Commentaar</th>
+                        </thead>
+                        <tr *ngFor="let event of events">
+                            <td>{{ event.id }}</td>
+                            <td>{{ event.name }}</td>
+                            <td>
+                                {{ event.start | date: 'dd-MM-yyyy HH:mm:ss' }}
+                            </td>
+                            <td>{{ event.event_teams[0].name }}</td>
+                            <td>{{ event.event_teams[1].name }}</td>
+                            <td>
+                                {{ event.event_teams[0].score }}-{{
+                                    event.event_teams[1].score
+                                }}
+                            </td>
+                            <td>
+                                {{ event.event_teams[0].crawl_score }}-{{
+                                    event.event_teams[1].crawl_score
+                                }}
+                            </td>
+                            <td>{{ event.event_teams[0].note }}</td>
+                        </tr>
+                    </table>
+
+                    <div class="alert callout" *ngIf="resResult.error">
+                        <div>
+                            {{ resResult.msg }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="grid-x">
+        <a
+            class="button cell large-12"
+            [ngClass]="{ disabled: loading }"
+            *ngIf="!finished"
+            (click)="getNextEventResults()"
+            >Meer resultaten laden</a
+        >
+    </div>
+</div>
