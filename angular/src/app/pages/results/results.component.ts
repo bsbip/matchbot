@@ -8,31 +8,43 @@ import { ActivatedRoute } from '@angular/router';
     styleUrls: ['./results.component.scss'],
 })
 export class ResultsComponent implements OnInit {
-    public id;
-    public events;
-    public index;
+    public id: number;
+    public events: any;
+    public index: string | number;
     public loading = false;
     public editResults = false;
     public statusType = 'without-results';
     public autoSelectedEvent = false;
     public team1Name = '';
     public team2Name = '';
-    public results = {};
-    public resResult = {};
+    public results: any = {};
+    public resResult: ApiResponse = {};
 
     constructor(
         private httpService: HttpService,
         private _routeParams: ActivatedRoute
     ) {}
 
-    ngOnInit() {
+    /**
+     * Handle the on init lifecycle.
+     *
+     * @author Ramon Bakker
+     */
+    public ngOnInit(): void {
         this._routeParams.params.subscribe(params => {
-            this.id = +params['id'];
+            this.id = +params.id;
         });
         this.getEvents(this.editResults);
     }
 
-    getEvents(editResults) {
+    /**
+     * Get events.
+     *
+     * @param editResults true to edit results
+     *
+     * @author Ramon Bakker
+     */
+    public getEvents(editResults: boolean): void {
         if (editResults) {
             this.statusType = 'with-results';
             this.editResults = true;
@@ -48,8 +60,8 @@ export class ResultsComponent implements OnInit {
 
                 // Select event based on route param (if available)
                 if (!isNaN(this.id)) {
-                    for (let event in this.events) {
-                        if (this.events[event].id == this.id) {
+                    for (const event in this.events) {
+                        if (this.events[event].id === this.id) {
                             this.index = event;
                         }
                     }
@@ -63,7 +75,14 @@ export class ResultsComponent implements OnInit {
         );
     }
 
-    selectEvent(index) {
+    /**
+     * Select an event.
+     *
+     * @param index the index of the event
+     *
+     * @author Ramon Bakker
+     */
+    public selectEvent(index: string | number): void {
         this.index = index;
         this.results = {
             id: this.events[index].id,
@@ -122,7 +141,14 @@ export class ResultsComponent implements OnInit {
         this.autoSelectedEvent = false;
     }
 
-    setTeamNames(index) {
+    /**
+     * Set the team names.
+     *
+     * @param index the index of the event
+     *
+     * @author Ramon Bakker
+     */
+    private setTeamNames(index: string | number): void {
         this.team1Name = '';
         this.team2Name = '';
 
@@ -137,7 +163,12 @@ export class ResultsComponent implements OnInit {
         }
     }
 
-    saveResults() {
+    /**
+     * Save the results.
+     *
+     * @author Ramon Bakker
+     */
+    public saveResults(): void {
         if (this.loading) {
             return;
         }
@@ -156,7 +187,7 @@ export class ResultsComponent implements OnInit {
             .subscribe(
                 data => {
                     this.resResult = data;
-                    this.resResult['success'] = true;
+                    this.resResult.success = true;
                     // Reset
                     this.team1Name = '';
                     this.team2Name = '';
@@ -170,10 +201,10 @@ export class ResultsComponent implements OnInit {
                     }
                 },
                 error => {
-                    this.resResult['success'] = false;
-                    this.resResult['error'] = true;
-                    this.resResult['errors'] = Object.values(error.data.errors);
-                    this.resResult['msg'] = error.data.msg;
+                    this.resResult.success = false;
+                    this.resResult.error = true;
+                    this.resResult.errors = Object.values(error.data.errors);
+                    this.resResult.msg = error.data.msg;
                     this.loading = false;
                 },
                 () => {
@@ -182,8 +213,14 @@ export class ResultsComponent implements OnInit {
             );
     }
 
-    deleteResults() {
+    /**
+     * Delete the results.
+     *
+     * @author Ramon Bakker
+     */
+    public deleteResults(): void {
         if (
+            this.loading ||
             !confirm(
                 'Weet je zeker dat je het resultaat voor deze match wilt verwijderen?'
             )
@@ -191,15 +228,11 @@ export class ResultsComponent implements OnInit {
             return;
         }
 
-        if (this.loading) {
-            return;
-        }
-
         this.loading = true;
         this.httpService.delete(`match/result/${this.results['id']}`).subscribe(
             data => {
                 this.resResult = data;
-                this.resResult['success'] = true;
+                this.resResult.success = true;
                 // Reset
                 this.team1Name = '';
                 this.team2Name = '';
@@ -213,10 +246,10 @@ export class ResultsComponent implements OnInit {
                 }
             },
             error => {
-                this.resResult['success'] = false;
-                this.resResult['error'] = true;
-                this.resResult['errors'] = Object.values(error.data.errors);
-                this.resResult['msg'] = error.data.msg;
+                this.resResult.success = false;
+                this.resResult.error = true;
+                this.resResult.errors = Object.values(error.data.errors);
+                this.resResult.msg = error.data.msg;
                 this.loading = false;
             },
             () => {

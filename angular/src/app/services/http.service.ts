@@ -22,7 +22,7 @@ export class HttpService {
      * @param url the request URL
      * @returns {Observable<Object>}
      */
-    get(url: string): Observable<Object> {
+    public get(url: string): Observable<Object> {
         return this.http.get(environment.apiBaseUrl + '/' + url, {
             headers: this.headers,
         });
@@ -35,7 +35,7 @@ export class HttpService {
      * @param body the request body
      * @returns {Observable<Object>}
      */
-    post(url: string, body: any): Observable<Object> {
+    public post(url: string, body: any): Observable<Object> {
         body = JSON.stringify(body);
 
         return this.http.post(environment.apiBaseUrl + '/' + url, body, {
@@ -50,7 +50,7 @@ export class HttpService {
      * @param body the request body
      * @returns {Observable<Object>}
      */
-    put(url: string, body: any): Observable<Object> {
+    public put(url: string, body: any): Observable<Object> {
         body = JSON.stringify(body);
 
         return this.http.put(environment.apiBaseUrl + '/' + url, body, {
@@ -64,7 +64,7 @@ export class HttpService {
      * @param url the request URL
      * @returns {Observable<{}>}
      */
-    delete(url: string): Observable<{}> {
+    public delete(url: string): Observable<{}> {
         return this.http.delete(environment.apiBaseUrl + '/' + url, {
             headers: this.headers,
         });

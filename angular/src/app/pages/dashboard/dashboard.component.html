@@ -40,7 +40,10 @@
                         </tr>
                     </table>
 
-                    <div class="alert callout" *ngIf="resResult.error">
+                    <div
+                        class="alert callout"
+                        *ngIf="resResult && resResult.error"
+                    >
                         <div>
                             {{ resResult.msg }}
                         </div>

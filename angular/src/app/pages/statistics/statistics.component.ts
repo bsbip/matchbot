@@ -7,115 +7,9 @@ import { HttpService } from 'src/app/services/http.service';
     styleUrls: ['./statistics.component.scss'],
 })
 export class StatisticsComponent implements OnInit {
-    public chartXlimit = 40;
-    public fillChartLines = true;
-    public fillChartLinesOptions = [
-        {
-            id: 0,
-            name: 'Ja',
-            value: true,
-        },
-        {
-            id: 1,
-            name: 'Nee',
-            value: false,
-        },
-    ];
-    public scoreChartData: Array<any> = [{ data: [], label: 'Score' }];
-    public scoreChartLabels: Array<any> = [];
-    public scoreChartOptions: any = {
-        animation: false,
-        responsive: true,
-        scales: {
-            xAxes: [
-                {
-                    scaleLabel: {
-                        display: true,
-                        labelString: 'Match',
-                    },
-                },
-            ],
-            yAxes: [
-                {
-                    ticks: {
-                        beginAtZero: true,
-                        stepSize: 1,
-                    },
-                    scaleLabel: {
-                        display: true,
-                        labelString: 'Teamscore',
-                    },
-                },
-            ],
-        },
-        title: {
-            display: true,
-            text:
-                'Teamscores spelers (laatste ' +
-                this.chartXlimit +
-                ' matches per speler)',
-            fontSize: 16,
-        },
-        elements: {
-            line: {
-                fill: this.fillChartLines,
-                tension: 0.2,
-            },
-        },
-    };
-    public scoreChartLegend = true;
-    public scoreChartType = 'line';
-
-    public crawlScoreChartData: Array<any> = [
-        { data: [], label: 'Kruipscore' },
-    ];
-    public crawlScoreChartLabels: Array<any> = [];
-    public crawlScoreChartOptions: any = {
-        animation: false,
-        responsive: true,
-        scales: {
-            xAxes: [
-                {
-                    scaleLabel: {
-                        display: true,
-                        labelString: 'Match',
-                    },
-                },
-            ],
-            yAxes: [
-                {
-                    ticks: {
-                        beginAtZero: true,
-                        stepSize: 1,
-                    },
-                    scaleLabel: {
-                        display: true,
-                        labelString: 'Kruipscore',
-                    },
-                },
-            ],
-        },
-        title: {
-            display: true,
-            text:
-                'Kruipscores spelers (laatste ' +
-                this.chartXlimit +
-                ' matches per speler)',
-            fontSize: 16,
-        },
-        elements: {
-            line: {
-                fill: this.fillChartLines,
-                tension: 0.2,
-            },
-        },
-    };
-    public crawlScoreChartLegend = true;
-    public crawlScoreChartType = 'line';
-
     public totals = [];
     public playerStats = [];
-    public data;
+    public data: any;
     public periodFilter = 2;
     public periods = [
         {
@@ -278,16 +172,29 @@ export class StatisticsComponent implements OnInit {
     ];
     public orderByDefault = 19;
     public orderBy = this.orderOptions[19];
-    public resResult = [];
+    public statsLimit = 40;
+    public resResult: ApiResponse = {};
 
     constructor(private httpService: HttpService) {}
 
-    ngOnInit() {
+    /**
+     * Handle the on init lifecycle.
+     *
+     * @author Ramon Bakker
+     */
+    public ngOnInit(): void {
         this.getTotals('all-time');
         this.getPlayerStats();
     }
 
-    getTotals(newPeriod: any) {
+    /**
+     * Get the totals
+     *
+     * @param newPeriod the new period
+     *
+     * @author Ramon Bakker
+     */
+    public getTotals(newPeriod: any): void {
         this.periodFilter = newPeriod;
 
         this.httpService
@@ -300,45 +207,47 @@ export class StatisticsComponent implements OnInit {
                 data => {
                     this.totals = [];
                     this.data = data;
-                    for (let stat of this.data) {
+                    for (const stat of this.data) {
                         this.totals.push(stat);
                     }
                 },
                 error => console.error(error),
                 () => {
                     if (this.totals.length === 0) {
-                        this.resResult['error'] = true;
-                        this.resResult['msg'] =
-                            'Geen statistieken beschikbaar.';
+                        this.resResult.error = true;
+                        this.resResult.msg = 'Geen statistieken beschikbaar.';
                     } else {
-                        this.resResult = [];
+                        this.resResult = {};
                     }
                 }
             );
     }
 
-    changeOrder(newOrder: string) {
+    /**
+     * Change the order and get totals.
+     *
+     * @param newOrder the new order
+     *
+     * @author Ramon Bakker
+     */
+    public changeOrder(newOrder: string): void {
         this.orderBy = this.orderOptions[newOrder];
         this.getTotals(this.periodFilter);
     }
 
-    changeFillChartLinesOption(newOption: string) {
-        this.fillChartLines = newOption === 'true' ? true : false;
-        this.scoreChartOptions.elements.line.fill = this.fillChartLines;
-        this.crawlScoreChartOptions.elements.line.fill = this.fillChartLines;
-    }
-
-    getPlayerStats() {
-        this.httpService.get(`stats/players/${this.chartXlimit}`).subscribe(
+    /**
+     * Get the player statistics.
+     *
+     * @author Ramon Bakker
+     */
+    private getPlayerStats(): void {
+        this.httpService.get(`stats/players/${this.statsLimit}`).subscribe(
             data => {
                 this.playerStats = [];
                 this.data = data;
                 for (const stat of this.data['results']) {
                     this.playerStats.push(stat);
                 }
-                const newScoreChartData = [];
-                const newCrawlScoreChartData = [];
-                const maxMatches = this.data['max_results'];
 
                 for (const playerStat of this.playerStats) {
                     const playerScores = [];
@@ -348,36 +257,15 @@ export class StatisticsComponent implements OnInit {
                         playerScores.push(result.score);
                         playerCrawlScores.push(result.crawl_score);
                     }
-                    newScoreChartData.push({
-                        data: playerScores,
-                        label: playerStat.player.name,
-                    });
-                    newCrawlScoreChartData.push({
-                        data: playerCrawlScores,
-                        label: playerStat.player.name,
-                    });
-                }
-                this.scoreChartData = newScoreChartData;
-                this.scoreChartLabels = [];
-
-                for (let i = 1; i <= maxMatches; i++) {
-                    this.scoreChartLabels.push(i);
-                }
-
-                this.crawlScoreChartData = newCrawlScoreChartData;
-                this.crawlScoreChartLabels = [];
-
-                for (let i = 1; i <= maxMatches; i++) {
-                    this.crawlScoreChartLabels.push(i);
                 }
             },
             error => console.error(error),
             () => {
                 if (this.totals.length === 0) {
-                    this.resResult['error'] = true;
-                    this.resResult['msg'] = 'Geen statistieken beschikbaar.';
+                    this.resResult.error = true;
+                    this.resResult.msg = 'Geen statistieken beschikbaar.';
                 } else {
-                    this.resResult = [];
+                    this.resResult = {};
                 }
             }
         );

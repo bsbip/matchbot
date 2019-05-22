@@ -21,10 +21,7 @@
 
             <div class="">
                 <label>Match</label>
-                <select
-                    [ngModel]="index"
-                    (ngModelChange)="selectEvent($event, i)"
-                >
+                <select [ngModel]="index" (ngModelChange)="selectEvent($event)">
                     <option
                         value="{{ i }}"
                         name="event"
@@ -121,9 +118,9 @@
             <div
                 class="success callout"
                 [innerHTML]="resResult.msg"
-                *ngIf="resResult.success"
+                *ngIf="resResult && resResult.success"
             ></div>
-            <div class="alert callout" *ngIf="resResult.error">
+            <div class="alert callout" *ngIf="resResult && resResult.error">
                 <div>
                     {{ resResult.msg }}
                 </div>

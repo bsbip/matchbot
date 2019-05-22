@@ -9,7 +9,7 @@ import { HttpService } from 'src/app/services/http.service';
 export class StandingsComponent implements OnInit {
     public totals = [];
     public playerStats = [];
-    public data;
+    public data: any;
 
     public periodFilter = 'all-time';
     public periods = [
@@ -89,17 +89,24 @@ export class StandingsComponent implements OnInit {
         },
     ];
 
-    public resResult = [];
+    public resResult: ApiResponse = {};
 
     constructor(private httpService: HttpService) {}
 
-    // on init, get stats
-    ngOnInit() {
+    /**
+     * Handle the on init lifecycle.
+     */
+    public ngOnInit(): void {
         this.getDuoStats(this.periodFilter, this.sortFilter);
     }
 
-    // get the stats for duo's from API
-    getDuoStats(newPeriod: string, newSort: string) {
+    /**
+     * Get the statistics for duo's.
+     *
+     * @param newPeriod the new period
+     * @param newSort the new sort option
+     */
+    public getDuoStats(newPeriod: string, newSort: string): void {
         // reset
         this.totals = [];
         // make request
@@ -108,21 +115,21 @@ export class StandingsComponent implements OnInit {
         this.httpService
             .get(`standings/duo/${this.periodFilter}/${this.sortFilter}`)
             .subscribe(
-                data => {
-                    if (data['msg'] === undefined) {
+                (data: ApiResponse) => {
+                    if (data.msg === undefined) {
                         this.data = data;
-                        for (let stat of this.data) {
+                        for (const stat of this.data) {
                             this.totals.push(stat);
                         }
                     } else {
-                        this.resResult['error'] = true;
-                        this.resResult['msg'] = data['msg'];
+                        this.resResult.error = true;
+                        this.resResult.msg = data.msg;
                     }
                 },
                 error => console.error(error),
                 () => {
                     if (this.totals.length > 0) {
-                        this.resResult = [];
+                        this.resResult = {};
                     }
                 }
             );

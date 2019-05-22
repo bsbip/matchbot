@@ -35,7 +35,7 @@
                         </select>
                     </div>
                 </div>
-                <table *ngIf="!resResult.error">
+                <table *ngIf="!resResult || !resResult.error">
                     <caption>
                         Stand per team
                     </caption>
@@ -65,7 +65,7 @@
                     </tr>
                 </table>
 
-                <div class="alert callout" *ngIf="resResult.error">
+                <div class="alert callout" *ngIf="resResult && resResult.error">
                     <div>
                         {{ resResult.msg }}
                     </div>

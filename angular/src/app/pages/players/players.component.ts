@@ -8,9 +8,9 @@ import { HttpService } from 'src/app/services/http.service';
 })
 export class PlayersComponent implements OnInit {
     public loading = false;
-    public resResult = {};
-    public users;
-    public player;
+    public resResult: ApiResponse = {};
+    public users: any;
+    public player: any;
 
     constructor(private httpService: HttpService) {
         this.player = {
@@ -18,14 +18,25 @@ export class PlayersComponent implements OnInit {
         };
     }
 
-    ngOnInit() {
+    /**
+     * Handle the on init lifecycle.
+     *
+     * @author Ramon Bakker
+     */
+    public ngOnInit(): void {
         this.getUsers();
     }
 
-    getUsers() {
+    /**
+     * Get the users.
+     *
+     * @author Ramon Bakker
+     */
+    public getUsers(): void {
         this.httpService.get('users/slack').subscribe(
             data => {
                 this.users = data;
+
                 if (this.users[0] !== undefined) {
                     this.player = this.users[0];
                 }
@@ -35,19 +46,24 @@ export class PlayersComponent implements OnInit {
         );
     }
 
-    editList() {
+    /**
+     * Edit the list with players.
+     *
+     * @author Ramon Bakker
+     */
+    public editList(): void {
         this.player.default = !this.player.default;
         this.loading = true;
         this.httpService.put('player', this.player).subscribe(
             data => {
                 this.resResult = data;
-                this.resResult['success'] = true;
+                this.resResult.success = true;
             },
             error => {
-                this.resResult['success'] = false;
-                this.resResult['error'] = true;
-                this.resResult['errors'] = Object.values(error.data.errors);
-                this.resResult['msg'] = error.data.msg;
+                this.resResult.success = false;
+                this.resResult.error = true;
+                this.resResult.errors = Object.values(error.data.errors);
+                this.resResult.msg = error.data.msg;
                 this.loading = false;
                 this.player.default = !this.player.default;
             },
@@ -57,7 +73,14 @@ export class PlayersComponent implements OnInit {
         );
     }
 
-    selectPlayer($event, i) {
+    /**
+     * Select a player.
+     *
+     * @param $event the event data
+     *
+     * @author Ramon Bakker
+     */
+    public selectPlayer($event: any): void {
         this.player = $event;
         this.resResult = {};
     }

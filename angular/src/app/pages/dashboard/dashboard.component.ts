@@ -13,22 +13,37 @@ export class DashboardComponent implements OnInit {
     public loading = false;
     public amountOfResults = 0;
     public events = [];
-    public resResult = [];
+    public resResult: ApiResponse = {};
 
     constructor(private httpService: HttpService) {}
 
-    ngOnInit() {
+    /**
+     * Handle on init lifecycle.
+     *
+     * @author Ramon Bakker
+     */
+    public ngOnInit(): void {
         this.getEventResults();
     }
 
-    getNextEventResults() {
+    /**
+     * Get the next event results.
+     *
+     * @author Ramon Bakker
+     */
+    public getNextEventResults(): void {
         if (!this.loading && !this.finished) {
             this.page++;
             this.getEventResults();
         }
     }
 
-    getEventResults() {
+    /**
+     * Get the event results.
+     *
+     * @author Ramon Bakker
+     */
+    public getEventResults(): void {
         this.loading = true;
         this.httpService
             .get(`events/results/${this.page}/${this.limit}`)
@@ -41,16 +56,16 @@ export class DashboardComponent implements OnInit {
                         this.amountOfResults++;
                     }
                 },
-                error => {
+                () => {
                     this.finished = true;
                     this.loading = false;
                 },
                 () => {
                     if (this.events.length === 0) {
-                        this.resResult['error'] = true;
-                        this.resResult['msg'] = 'Geen matches gevonden.';
+                        this.resResult.error = true;
+                        this.resResult.msg = 'Geen matches gevonden.';
                     } else {
-                        this.resResult = [];
+                        this.resResult = {};
                     }
 
                     if (this.amountOfResults < this.limit) {

@@ -12,7 +12,7 @@
                 <label>Speler</label>
                 <select
                     [ngModel]="player"
-                    (ngModelChange)="selectPlayer($event, i)"
+                    (ngModelChange)="selectPlayer($event)"
                 >
                     <option
                         [ngValue]="user"
@@ -50,9 +50,9 @@
             <div
                 class="success callout"
                 [innerHTML]="resResult.msg"
-                *ngIf="resResult.success"
+                *ngIf="resResult && resResult.success"
             ></div>
-            <div class="alert callout" *ngIf="resResult.error">
+            <div class="alert callout" *ngIf="resResult && resResult.error">
                 <div>
                     {{ resResult.msg }}
                 </div>
