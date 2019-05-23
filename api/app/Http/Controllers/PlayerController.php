@@ -89,13 +89,13 @@ class PlayerController extends Controller
      */
     public function updatePlayer(Request $request): JsonResponse
     {
-        $player = Player::where('user_id', Request::input('id'))
+        $player = Player::where('user_id', $request->input('id'))
             ->first();
 
         if (!isset($player)) {
             return $this->addPlayer($request);
         } else {
-            $player->default = Request::input('default');
+            $player->default = $request->input('default');
 
             if (!$player->save()) {
                 return new JsonResponse([

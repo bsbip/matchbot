@@ -20,7 +20,7 @@ class VerifySlackToken
     public function handle(Request $request, Closure $next)
     {
         // Check Slack token
-        $slackTokenValid = $this->checkSlackToken($request->input('token'), [
+        $slackTokenValid = $this->checkSlackToken($request->input('token', ''), [
             env('SLACK_SLASH_COMMAND_MATCH_TOKEN1'),
             env('SLACK_SLASH_COMMAND_MATCH_TOKEN2'),
             env('SLACK_SLASH_COMMAND_MATCH_TOKEN3'),

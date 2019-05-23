@@ -12,6 +12,7 @@ use App\Jobs\CreateMatch;
 use Illuminate\Http\Request;
 use App\Jobs\CalculatePoints;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Database\Eloquent\Collection;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -98,7 +99,7 @@ class MatchController extends Controller
     public function createCustom(Request $request, int $minUsers = 4): JsonResponse
     {
         $userIds = [];
-        $users = json_decode(json_encode(Request::all()), false);
+        $users = json_decode(json_encode($request->all()), false);
 
         // Validate users
         if (sizeof($users) !== $minUsers) {
@@ -164,13 +165,15 @@ class MatchController extends Controller
     /**
      * Save the result of a match via Slack.
      *
+     * @param Request $request
+     *
      * @return JsonResponse
      *
      * @author Ramon Bakker <ramonbakker@rambit.nl>
      */
-    public function saveResultSlack(): JsonResponse
+    public function saveResultSlack(Request $request): JsonResponse
     {
-        $text = Request::input('text');
+        $text = $request->input('text');
         $matchId = substr($text, 0, strpos($text, ' '));
         $scores = [];
         $crawlScores = [];
@@ -430,29 +433,30 @@ class MatchController extends Controller
     /**
      * Save the result of a match.
      *
+     * @param Request $request
      * @param mixed $update true to update result
      *
      * @return JsonResponse
      *
      * @author Ramon Bakker <ramonbakker@rambit.nl>
      */
-    public function saveResult($update = false): JsonResponse
+    public function saveResult(Request $request, $update = false): JsonResponse
     {
         $update = filter_var($update, FILTER_VALIDATE_BOOLEAN);
-        $matchId = Request::input('id');
+        $matchId = $request->input('id');
         $scores = [];
         $crawlScores = [];
-        $note = Request::input('note');
+        $note = $request->input('note');
         $errors = [
             'errors' => new \StdClass(),
             'msg' => '',
         ];
 
-        $scores[0] = Request::input('scoreTeam1');
-        $scores[1] = Request::input('scoreTeam2');
+        $scores[0] = $request->input('scoreTeam1');
+        $scores[1] = $request->input('scoreTeam2');
 
-        $crawlScores[0] = Request::input('crawlsTeam1');
-        $crawlScores[1] = Request::input('crawlsTeam2');
+        $crawlScores[0] = $request->input('crawlsTeam1');
+        $crawlScores[1] = $request->input('crawlsTeam2');
 
         if (!isset($note)) {
             $note = '';
@@ -496,7 +500,8 @@ class MatchController extends Controller
 
         // Update event info
         $event = Event::find($matchId);
-        if (sizeof($event) > 0) {
+
+        if (isset($event)) {
             if (!$update) {
                 $event->end = date('Y-m-d H:i:s');
             }
@@ -532,13 +537,14 @@ class MatchController extends Controller
             if (!isset($scores[$key]) || !isset($crawlScores[$key])) {
                 $errors['msg'] = 'De (kruip)score is in een verkeerd formaat ingevoerd.';
             }
+
             if ($update) {
                 $result = Result::where('event_id', $matchId)
                     ->where('deleted', false)
                     ->where('team_id', $eventTeam->team_id)
                     ->first();
 
-                if (sizeof($result) === 0) {
+                if (!isset($result)) {
                     $errors['msg'] = "Geen resultaten gevonden.\n";
 
                     return new JsonResponse($errors, Response::HTTP_NOT_ACCEPTABLE);
@@ -546,6 +552,7 @@ class MatchController extends Controller
             } else {
                 $result = new Result();
             }
+
             $result->event_id = $matchId;
             $result->team_id = $eventTeam->team_id;
             $result->score = $scores[$key];
@@ -682,7 +689,7 @@ class MatchController extends Controller
      *
      * @author Ramon Bakker <ramonbakker@rambit.nl>
      */
-    private function makeResultAttachments(object $event, object $record): array
+    private function makeResultAttachments(Event $event, Collection $record): array
     {
         $attachments = [
             [

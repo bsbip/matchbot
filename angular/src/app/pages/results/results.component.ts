@@ -173,6 +173,14 @@ export class ResultsComponent implements OnInit {
             return;
         }
 
+        if (this.results['scoreTeam1'] === undefined) {
+            this.results['scoreTeam1'] = 0;
+        }
+
+        if (this.results['scoreTeam2'] === undefined) {
+            this.results['scoreTeam2'] = 0;
+        }
+
         if (this.results['crawlsTeam1'] === undefined) {
             this.results['crawlsTeam1'] = 0;
         }
@@ -203,8 +211,14 @@ export class ResultsComponent implements OnInit {
                 error => {
                     this.resResult.success = false;
                     this.resResult.error = true;
-                    this.resResult.errors = Object.values(error.data.errors);
-                    this.resResult.msg = error.data.msg;
+
+                    if (error.error !== undefined) {
+                        this.resResult.errors = Object.values(
+                            error.error.errors
+                        );
+                        this.resResult.msg = error.error.msg;
+                    }
+
                     this.loading = false;
                 },
                 () => {
@@ -248,8 +262,12 @@ export class ResultsComponent implements OnInit {
             error => {
                 this.resResult.success = false;
                 this.resResult.error = true;
-                this.resResult.errors = Object.values(error.data.errors);
-                this.resResult.msg = error.data.msg;
+
+                if (error.error !== undefined) {
+                    this.resResult.errors = Object.values(error.error.errors);
+                    this.resResult.msg = error.error.msg;
+                }
+
                 this.loading = false;
             },
             () => {
