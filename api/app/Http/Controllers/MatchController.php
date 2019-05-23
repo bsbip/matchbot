@@ -3,13 +3,13 @@
 namespace App\Http\Controllers;
 
 use DB;
-use Request;
 use App\Event;
 use Validator;
 use App\Player;
 use App\Result;
 use App\EventTeam;
 use App\Jobs\CreateMatch;
+use Illuminate\Http\Request;
 use App\Jobs\CalculatePoints;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;

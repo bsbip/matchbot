@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Request;
 use App\Player;
+use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 

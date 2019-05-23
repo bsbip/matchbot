@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Request;
 use App\Team;
-use App\Event;
 use App\Player;
 use App\Result;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
 /**
@@ -18,13 +17,15 @@ class StatsController extends Controller
     /**
      * Get a result.
      *
+     * @param Request $request
+     *
      * @return JsonResponse
      *
      * @author Ramon Bakker <ramonbakker@rambit.nl>
      */
-    public function getResult(): JsonResponse
+    public function getResult(Request $request): JsonResponse
     {
-        $text = Request::input('text');
+        $text = $request->input('text');
         $resultText = '';
 
         if (strpos($text, 'overall') !== false) {
