@@ -77,8 +77,12 @@ export class MatchComponent implements OnInit {
             error => {
                 this.resResult.success = false;
                 this.resResult.error = true;
-                this.resResult.errors = Object.values(error.data.errors);
-                this.resResult.msg = error.data.msg;
+
+                if (error.error !== undefined) {
+                    this.resResult.errors = Object.values(error.error.errors);
+                    this.resResult.msg = error.error.msg;
+                }
+
                 this.loading = false;
             },
             () => {
@@ -105,7 +109,7 @@ export class MatchComponent implements OnInit {
                 error => {
                     this.resResult.success = false;
                     this.resResult.error = true;
-                    this.resResult.msg = error.data.msg;
+                    this.resResult.msg = error.error.msg;
                     this.loading = false;
                     this.createMatchAllowed = true;
                 },

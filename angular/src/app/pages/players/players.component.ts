@@ -62,8 +62,12 @@ export class PlayersComponent implements OnInit {
             error => {
                 this.resResult.success = false;
                 this.resResult.error = true;
-                this.resResult.errors = Object.values(error.data.errors);
-                this.resResult.msg = error.data.msg;
+
+                if (error.error !== undefined) {
+                    this.resResult.errors = Object.values(error.error.errors);
+                    this.resResult.msg = error.error.msg;
+                }
+
                 this.loading = false;
                 this.player.default = !this.player.default;
             },

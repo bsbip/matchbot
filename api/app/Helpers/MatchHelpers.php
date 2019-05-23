@@ -230,7 +230,7 @@ function createMatch(array $activeUsers, bool $random = true): JsonResponse
             }
         }
 
-        if (sizeof($team) === 0) {
+        if (sizeof(get_object_vars($team)) === 0) {
             $data['text'] = 'Team niet gevonden.';
             sendSlackResponse($data, env('SLACK_WEBHOOK_URL'));
 

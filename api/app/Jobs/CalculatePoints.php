@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Event;
 use App\Player;
+use App\EventTeam;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
@@ -81,14 +82,16 @@ class CalculatePoints implements ShouldQueue
     }
 
     /**
-     * Set points per team
-     * @param  \App\EventTeam $team
+     * Set points per team.
+     *
+     * @param  EventTeam $team
      * @param  int $highestPoints
      * @param  int $basePoints
      * @param  float $fairnessCorrection
-     * @return \App\EventTeam
+     *
+     * @return EventTeam
      */
-    public function setPointsPerTeam($team, $highestPoints, $basePoints, $fairnessCorrection)
+    public function setPointsPerTeam(EventTeam $team, int $highestPoints, int $basePoints, float $fairnessCorrection): EventTeam
     {
         if ($team->win) {
             if ($highestPoints == $team->points) {
@@ -119,12 +122,14 @@ class CalculatePoints implements ShouldQueue
     }
 
     /**
-     * Set points per player
-     * @param  \App\Player $player
-     * @param  \App\EventTeam $team
-     * @return int
+     * Set points per player.
+     *
+     * @param  Player $player
+     * @param  EventTeam $team
+     *
+     * @return float
      */
-    public function setPointsPerPlayer($player, $team)
+    public function setPointsPerPlayer($player, $team): float
     {
         if ($team->points == 0) {
             $percentage = 0.50;
@@ -141,12 +146,14 @@ class CalculatePoints implements ShouldQueue
     }
 
     /**
-     * Check if team is winner
-     * @param  \App\EventTeam $team
-     * @param  \App\EventTeam $opponent
+     * Check if team is winner.
+     *
+     * @param  EventTeam $team
+     * @param  EventTeam $opponent
+     *
      * @return bool
      */
-    public function isWinner($team, $opponent)
+    public function isWinner($team, $opponent): bool
     {
         return $team->result->score > $opponent->result->score;
     }
