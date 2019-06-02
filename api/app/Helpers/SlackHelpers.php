@@ -65,13 +65,13 @@ function getSlackUserList(string $token): array
 /**
  * Get a Slack user.
  *
- * @param  int $userId the id of the user
+ * @param  string $userId the id of the user
  * @param  string $token the Slack token
  * @return object
  *
  * @author Ramon Bakker <ramonbakker@rambit.nl>
  */
-function getSlackUser(int $userId, string $token): object
+function getSlackUser(string $userId, string $token): object
 {
     $client = new \GuzzleHttp\Client();
 
