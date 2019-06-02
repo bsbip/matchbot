@@ -35,7 +35,7 @@ class PlayerController extends Controller
         }
 
         // Get Slack user
-        $slackUser = getSlackUser((int) $request->input('id'), env('SLACK_TOKEN'));
+        $slackUser = getSlackUser($request->input('id'));
 
         if (sizeof($slackUser) === 0) {
             return new JsonResponse([

@@ -1,4 +1,8 @@
 <?php
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
+use Psr\Http\Message\ResponseInterface;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
  * Send a Slack response.
@@ -19,11 +23,41 @@ function sendSlackResponse(array $data, string $url): bool
             'json' => $data,
         ]);
     } catch (Exception $e) {
-        // Failed to get data
+        Log::error($e);
+
         return false;
     }
 
     return true;
+}
+
+/**
+ * Send a Slack message.
+ *
+ * @param array $data
+ * @param string $method the Slack chat method type
+ *
+ * @return ResponseInterface
+ *
+ * @author Ramon Bakker <ramonbakker@rambit.nl>
+ */
+function sendSlackMessage($data = [], $method = 'postMessage'): ResponseInterface
+{
+    $client = new \GuzzleHttp\Client();
+
+    try {
+        $res = $client->post(env('SLACK_API_URL') . '/chat.' . $method, [
+            'headers' => [
+                'Content-Type' => 'application/json; charset=utf-8',
+                'Authorization' => 'Bearer ' . env('SLACK_TOKEN'),
+            ],
+            'json' => $data,
+        ]);
+    } catch (Exception $e) {
+        Log::error($e);
+    }
+
+    return $res;
 }
 
 /**
@@ -40,7 +74,7 @@ function getSlackUserList(string $token): array
     $client = new \GuzzleHttp\Client();
 
     try {
-        $res = $client->get('https://slack.com/api/users.list', [
+        $res = $client->get(env('SLACK_API_URL') . '/users.list', [
             'query' => [
                 'token' => $token,
                 'pretty' => 1,
@@ -65,33 +99,27 @@ function getSlackUserList(string $token): array
 /**
  * Get a Slack user.
  *
- * @param  int $userId the id of the user
- * @param  string $token the Slack token
+ * @param  string $userId the id of the user
  * @return object
  *
  * @author Ramon Bakker <ramonbakker@rambit.nl>
  */
-function getSlackUser(int $userId, string $token): object
+function getSlackUser(string $userId): object
 {
     $client = new \GuzzleHttp\Client();
 
-    try {
-        $res = $client->get('https://slack.com/api/users.info', [
-            'query' => [
-                'token' => $token,
-                'pretty' => 1,
-                'user' => $userId,
-            ],
-        ]);
-    } catch (Exception $e) {
-        // Failed to get data
-        return [];
-    }
+    $res = $client->get(env('SLACK_API_URL') . '/users.info', [
+        'query' => [
+            'token' => env('SLACK_TOKEN'),
+            'pretty' => 1,
+            'user' => $userId,
+        ],
+    ]);
 
     $data = json_decode($res->getBody());
 
     if (!isset($data->user)) {
-        return [];
+        throw new HttpException(Response::HTTP_NOT_FOUND);
     }
 
     return $data->user;

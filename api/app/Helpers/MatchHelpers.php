@@ -5,19 +5,22 @@ use App\Event;
 use App\Player;
 use App\EventTeam;
 use App\TeamPlayer;
+use App\EventInitiation;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Config;
 
 /**
  * Create a new match.
  *
  * @param  array $activeUsers the active users
  * @param  bool $random true to choose random users
+ * @param  EventInitiation|null $eventInitiation the event initiation
  *
  * @return JsonResponse
  *
  * @author Ramon Bakker <ramonbakker@rambit.nl>
  */
-function createMatch(array $activeUsers, bool $random = true): JsonResponse
+function createMatch(array $activeUsers, bool $random = true, $eventInitiation = null): JsonResponse
 {
     $responseText = '';
     $maxUsers = 0;
@@ -30,8 +33,15 @@ function createMatch(array $activeUsers, bool $random = true): JsonResponse
         'icon_url' => asset('assets/img/matchbot-icon.jpg'),
     ];
 
-    if (sizeof($activeUsers) < 4) {
-        $responseText = 'Er zijn niet genoeg spelers beschikbaar op dit moment.';
+    if (sizeof($activeUsers) < Config::get('match.min_users')) {
+        if (isset($eventInitiation)) {
+            $responseText = 'Er zijn momenteel onvoldoende belangstellenden voor een match. Er zal een match worden aangemaakt zodra er voldoende belangstellenden zijn.';
+
+            $eventInitiation->start_when_possible = true;
+            $eventInitiation->save();
+        } else {
+            $responseText = 'Er zijn niet genoeg spelers beschikbaar op dit moment.';
+        }
 
         $data['text'] = $responseText;
         sendSlackResponse($data, env('SLACK_WEBHOOK_URL'));
@@ -41,7 +51,7 @@ function createMatch(array $activeUsers, bool $random = true): JsonResponse
             'errors' => new \StdClass(),
         ]);
     } else {
-        $maxUsers = 4;
+        $maxUsers = Config::get('match.min_users');
     }
 
     \DB::beginTransaction();
@@ -255,6 +265,11 @@ function createMatch(array $activeUsers, bool $random = true): JsonResponse
                 'errors' => new \StdClass(),
             ]);
         }
+    }
+
+    if (isset($eventInitiation)) {
+        $eventInitiation->event_id = $event->id;
+        $eventInitiation->save();
     }
 
     \DB::commit();

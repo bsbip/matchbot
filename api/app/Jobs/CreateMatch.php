@@ -6,9 +6,6 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
-use Illuminate\Http\Request;
-use App\Http\Requests;
-
 /**
  * Job for creating a match
  */
@@ -37,10 +34,10 @@ class CreateMatch implements ShouldQueue
      */
     public function handle()
     {
-        if (!empty($this->users)) {
-            $activeUsers = $this->users;
-        } else {
+        if (empty($this->users)) {
             $activeUsers = getActiveUsers($this->text);
+        } else {
+            $activeUsers = $this->users;
         }
 
         return createMatch($activeUsers);

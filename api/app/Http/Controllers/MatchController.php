@@ -9,9 +9,11 @@ use App\Player;
 use App\Result;
 use App\EventTeam;
 use App\Jobs\CreateMatch;
+use App\Jobs\InitiateMatch;
 use Illuminate\Http\Request;
 use App\Jobs\CalculatePoints;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Config;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -19,6 +21,31 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class MatchController extends Controller
 {
+    /**
+     * Initiate a match.
+     *
+     * @param Request $request
+     *
+     * @return JsonResponse
+     * @author Ramon Bakker <ramonbakker@rambit.nl>
+     */
+    public function initiate(Request $request): JsonResponse
+    {
+        // Check if invalid wait time has been provided
+        if (strlen($request->input('text') > 0) && !is_numeric($request->input('text'))) {
+            return new JsonResponse([
+                'text' => 'Geef een geldige wachttijd op.',
+            ], Response::HTTP_OK);
+        }
+
+        InitiateMatch::dispatch($request->all());
+
+        return new JsonResponse([
+            'response_type' => 'in_channel',
+            'text' => 'Een nieuwe match wordt geïnitieerd.',
+        ], Response::HTTP_OK);
+    }
+
     /**
      * Create a new match.
      *
@@ -47,7 +74,7 @@ class MatchController extends Controller
 
             $msg = 'Aanvraag ontvangen via webinterface. ';
             $msg .= "Even geduld alsjeblieft, Matchbot probeert teams samen te stellen.\n";
-            $msg .= '*Potentiële spelers (' . sizeof($users) . ')*';
+            $msg .= '*' . sizeof($users) . ' potentiële spelers*';
 
             foreach ($users as $user) {
                 $attachments[] = [
@@ -89,14 +116,18 @@ class MatchController extends Controller
      *
      * @param  Request $request the request
      *
-     * @param  int $minUsers the minimum amount of users
+     * @param  int|null $minUsers the minimum amount of users
      *
      * @return JsonResponse
      *
      * @author Ramon Bakker <ramonbakker@rambit.nl>
      */
-    public function createCustom(Request $request, int $minUsers = 4): JsonResponse
+    public function createCustom(Request $request, $minUsers = null): JsonResponse
     {
+        if (is_null($minUsers)) {
+            $minUsers = Config::get('match.min_users');
+        }
+
         $userIds = [];
         $users = json_decode(json_encode($request->all()), false);
 
@@ -327,7 +358,7 @@ class MatchController extends Controller
         $client = new \GuzzleHttp\Client();
 
         try {
-            $res = $client->get('https://slack.com/api/users.list', [
+            $res = $client->get(env('SLACK_API_URL') . '/users.list', [
                 'query' => [
                     'token' => $token,
                     'pretty' => 1,

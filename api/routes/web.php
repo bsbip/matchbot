@@ -87,6 +87,17 @@ Route::group(['prefix' => 'api'], function () {
         ]);
     });
 
+    Route::group([
+        'prefix' => 'slack',
+    ], function () {
+        Route::post('/match/initiate', [
+            'uses' => 'MatchController@initiate',
+        ]);
+        Route::post('/interaction', [
+            'uses' => 'InteractionController@handle',
+        ]);
+    });
+
     Route::any('/{path?}', function () {
         return new JsonResponse([
             'msg' => 'Not a valid API call.',
@@ -96,9 +107,8 @@ Route::group(['prefix' => 'api'], function () {
 
 Route::group([
     'prefix' => '',
-    'middleware' => 'auth.token.app',
 ], function () {
     Route::any('{path?}', function () {
-        return new JsonResponse('Not found.', Response::NOT_FOUND);
+        return new JsonResponse('Not found.', Response::HTTP_NOT_FOUND);
     })->where('path', '.+');
 });
