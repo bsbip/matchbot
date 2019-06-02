@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use App\Jobs\CalculatePoints;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Database\Eloquent\Collection;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -719,7 +720,7 @@ class MatchController extends Controller
      *
      * @author Ramon Bakker <ramonbakker@rambit.nl>
      */
-    private function makeResultAttachments(object $event, object $record): array
+    private function makeResultAttachments(Event $event, Collection $record): array
     {
         $attachments = [
             [
