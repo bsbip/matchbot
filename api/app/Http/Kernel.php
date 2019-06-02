@@ -60,6 +60,7 @@ class Kernel extends HttpKernel
 
         'auth.token.api' => \App\Http\Middleware\VerifyApiToken::class,
         'auth.token.slack' => \App\Http\Middleware\VerifySlackToken::class,
+        'auth.signature.slack' => \App\Http\Middleware\VerifySlackSignature::class,
         'auth.token.app' => \App\Http\Middleware\VerifyAppToken::class,
     ];
 }

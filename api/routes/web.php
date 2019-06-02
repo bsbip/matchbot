@@ -89,6 +89,7 @@ Route::group(['prefix' => 'api'], function () {
 
     Route::group([
         'prefix' => 'slack',
+        'middleware' => 'auth.signature.slack',
     ], function () {
         Route::post('/match/initiate', [
             'uses' => 'MatchController@initiate',
