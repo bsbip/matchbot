@@ -1,7 +1,11 @@
 <?php
+use Carbon\Carbon;
+use App\EventInitiation;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Config;
 use Psr\Http\Message\ResponseInterface;
+use App\EventInitiationScheduledMessage;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
@@ -58,6 +62,117 @@ function sendSlackMessage($data = [], $method = 'postMessage'): ResponseInterfac
     }
 
     return $res;
+}
+
+/**
+ * Get the permalink of a Slack message.
+ *
+ * @param string $messageTs
+ * @param string $channelId
+ *
+ * @return object
+ *
+ * @author Ramon Bakker <ramonbakker@rambit.nl>
+ */
+function getSlackMessagePermalink(string $messageTs, string $channelId): object
+{
+    try {
+        $client = new \GuzzleHttp\Client();
+
+        $res = $client->get(env('SLACK_API_URL') . '/chat.getPermalink', [
+            'headers' => [
+                'Content-Type' => 'application/x-www-form-urlencoded; charset=utf-8',
+                'Authorization' => 'Bearer ' . env('SLACK_TOKEN'),
+            ],
+            'query' => [
+                'channel' => $channelId,
+                'message_ts' => $messageTs,
+            ],
+        ]);
+    } catch (Exception $e) {
+        Log::error($e);
+    }
+
+    return json_decode($res->getBody($res));
+}
+
+/**
+ * Schedule a Slack message for an event initiation.
+ *
+ * @param EventInitiation $eventInitiation
+ * @param string $channelId
+ *
+ * @return void
+ *
+ * @author Ramon Bakker <ramonbakker@rambit.nl>
+ */
+function scheduleSlackMessage(EventInitiation $eventInitiation, string $channelId): void
+{
+    $permalink = getSlackMessagePermalink($eventInitiation->message_ts, $channelId);
+    $expireAt = Carbon::parse($eventInitiation->expire_at);
+
+    if ($expireAt->lessThanOrEqualTo(now()->subMinutes(Config::get('initiation.scheduled_message_offset')))) {
+        return;
+    }
+
+    $res = sendSlackMessage([
+        'channel' => $channelId,
+        'text' => trans('event-initiation.initiation_expires_in_short_time', [
+            'id' => "<{$permalink->permalink}|$eventInitiation->id>",
+        ]),
+        'post_at' => $expireAt
+            ->subMinutes(Config::get('initiation.scheduled_message_offset'))
+            ->getTimestamp(),
+    ], 'scheduleMessage');
+
+    $responseBody = json_decode($res->getBody());
+
+    if (!isset($responseBody->scheduled_message_id)) {
+        return;
+    }
+
+    EventInitiationScheduledMessage::create([
+        'scheduled_message_id' => $responseBody->scheduled_message_id,
+        'channel_id' => $channelId,
+        'event_initiation_id' => $eventInitiation->id,
+    ]);
+}
+
+/**
+ * Delete scheduled Slack messages for an event initiation.
+ *
+ * @param int $eventInitiationId
+ *
+ * @return void
+ *
+ * @author Ramon Bakker <ramonbakker@rambit.nl>
+ */
+function deleteEventInitiationScheduledSlackMessages($eventInitiationId): void
+{
+    $scheduledMessages = EventInitiationScheduledMessage::where('event_initiation_id', $eventInitiationId)
+        ->get();
+
+    $client = new \GuzzleHttp\Client();
+
+    foreach ($scheduledMessages as $scheduledMessage) {
+        try {
+            $client->post(env('SLACK_API_URL') . '/chat.deleteScheduledMessage', [
+                'headers' => [
+                    'Content-Type' => 'application/json; charset=utf-8',
+                    'Authorization' => 'Bearer ' . env('SLACK_TOKEN'),
+                ],
+                'json' => [
+                    'channel' => $scheduledMessage->channel_id,
+                    'scheduled_message_id' => $scheduledMessage->scheduled_message_id,
+                ],
+            ]);
+        } catch (Exception $e) {
+            Log::error($e);
+        }
+    }
+
+    EventInitiationScheduledMessage::where('event_initiation_id', $eventInitiationId)
+        ->delete();
 }
 
 /**

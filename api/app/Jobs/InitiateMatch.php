@@ -152,6 +152,10 @@ class InitiateMatch implements ShouldQueue
             'participate' => true,
         ]);
 
+        if (!is_null($eventInitiation->expire_at)) {
+            scheduleSlackMessage($eventInitiation, $this->input['channel_id']);
+        }
+
         DB::commit();
 
         if (isset($eventInitiation->expire_at)) {

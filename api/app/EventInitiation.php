@@ -2,7 +2,9 @@
 
 namespace App;
 
+use App\EventInitiationUser;
 use Illuminate\Database\Eloquent\Model;
+use App\EventInitiationScheduledMessage;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class EventInitiation extends Model
@@ -23,5 +25,17 @@ class EventInitiation extends Model
     public function users(): HasMany
     {
         return $this->hasMany(EventInitiationUser::class, 'event_initiation_id', 'id');
+    }
+
+    /**
+     * Event initiation scheduled messages relationship
+     *
+     * @return HasMany
+     *
+     * @author Ramon Bakker <ramonbakker@rambit.nl>
+     */
+    public function scheduledMessages(): HasMany
+    {
+        return $this->hasMany(EventInitiationScheduledMessage::class, 'event_initiation_id', 'id');
     }
 }

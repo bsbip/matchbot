@@ -10,4 +10,5 @@ return [
         30,
         60,
     ],
+    'scheduled_message_offset' => 1,
 ];

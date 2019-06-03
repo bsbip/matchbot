@@ -155,8 +155,8 @@ class Interact implements ShouldQueue
         // Create a match if initiation already expired and amount of
         // participants is now high enough
         if ($expireAtObj->lessThan(now()) && $amountOfParticipants >= Config::get('match.min_users')) {
-            CreateMatchFromInitiation::dispatch($eventInitiation->id)
-                ->delay($eventInitiation->expire_at);
+            deleteEventInitiationScheduledSlackMessages($eventInitiation->id);
+            CreateMatchFromInitiation::dispatch($eventInitiation->id);
         } elseif ($eventInitiation->isDirty('expire_at')) {
             $blocks[0]->text->text = trans('event-initiation.choose_for_match_with_time', [
                 'time' => $eventInitiation->expire_at->toTimeString(),
@@ -173,6 +173,8 @@ class Interact implements ShouldQueue
                 ]);
             }
 
+            deleteEventInitiationScheduledSlackMessages($eventInitiation->id);
+
             $eventInitiation->save();
 
             sendSlackMessage([
@@ -184,8 +186,14 @@ class Interact implements ShouldQueue
                 ]) . ' ' . $matchTimeText,
             ]);
 
-            CreateMatchFromInitiation::dispatch($eventInitiation->id)
-                ->delay($eventInitiation->expire_at);
+            if (Carbon::parse($eventInitiation->expire_at)->lessThanOrEqualTo(now())) {
+                CreateMatchFromInitiation::dispatch($eventInitiation->id);
+            } else {
+                CreateMatchFromInitiation::dispatch($eventInitiation->id)
+                    ->delay($eventInitiation->expire_at);
+
+                scheduleSlackMessage($eventInitiation, $this->payload->channel->id);
+            }
         }
 
         sendSlackMessage([
