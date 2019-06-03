@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use Carbon\Carbon;
 use App\EventInitiation;
 use App\EventInitiationUser;
 use Illuminate\Bus\Queueable;
@@ -47,13 +48,11 @@ class InitiateMatch implements ShouldQueue
             $expireText = '';
         }
 
-        if (strlen($this->input['text'] > 0)) {
-            if (is_numeric($this->input['text'])) {
-                $eventInitiation->expire_at = now()->addMinutes($this->input['text']);
-                $expireText .= trans('event-initiation.choose_for_match_with_time', [
-                    'time' => $eventInitiation->expire_at->toTimeString(),
-                ]);
-            }
+        if (strlen($this->input['text']) > 0) {
+            $eventInitiation->expire_at = Carbon::parse($this->input['text']);
+            $expireText .= trans('event-initiation.choose_for_match_with_time', [
+                'time' => $eventInitiation->expire_at->toTimeString(),
+            ]);
         } else {
             $expireText .= trans('event-initiation.choose_for_next_match');
         }

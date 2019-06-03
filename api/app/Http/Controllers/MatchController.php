@@ -4,15 +4,18 @@ namespace App\Http\Controllers;
 
 use DB;
 use App\Event;
+use Exception;
 use Validator;
 use App\Player;
 use App\Result;
 use App\EventTeam;
+use Carbon\Carbon;
 use App\Jobs\CreateMatch;
 use App\Jobs\InitiateMatch;
 use Illuminate\Http\Request;
 use App\Jobs\CalculatePoints;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Database\Eloquent\Collection;
 use Symfony\Component\HttpFoundation\Response;
@@ -32,11 +35,17 @@ class MatchController extends Controller
      */
     public function initiate(Request $request): JsonResponse
     {
-        // Check if invalid wait time has been provided
-        if (strlen($request->input('text') > 0) && !is_numeric($request->input('text'))) {
-            return new JsonResponse([
-                'text' => trans('event-initiation.provide_valid_wait_time'),
-            ], Response::HTTP_OK);
+        // Check if valid wait time has been provided
+        if (strlen($request->input('text')) > 0) {
+            try {
+                Carbon::parse($request->input('text'));
+            } catch (Exception $e) {
+                Log::info($e);
+
+                return new JsonResponse([
+                    'text' => trans('event-initiation.provide_valid_wait_time'),
+                ], Response::HTTP_OK);
+            }
         }
 
         InitiateMatch::dispatch($request->all());
