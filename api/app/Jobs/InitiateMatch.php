@@ -6,7 +6,6 @@ use App\EventInitiation;
 use App\EventInitiationUser;
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Facades\DB;
-use GuzzleHttp\Client as GuzzleClient;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Config;
 use App\Jobs\CreateMatchFromInitiation;
@@ -40,7 +39,6 @@ class InitiateMatch implements ShouldQueue
      */
     public function handle()
     {
-        $client = new GuzzleClient();
         $eventInitiation = new EventInitiation();
 
         if (Config::get('initiation.mention')) {
@@ -52,17 +50,19 @@ class InitiateMatch implements ShouldQueue
         if (strlen($this->input['text'] > 0)) {
             if (is_numeric($this->input['text'])) {
                 $eventInitiation->expire_at = now()->addMinutes($this->input['text']);
-                $expireText .= "Geef aan of je mee wilt doen met de match van {$eventInitiation->expire_at->toTimeString()}.";
+                $expireText .= trans('event-initiation.choose_for_match_with_time', [
+                    'time' => $eventInitiation->expire_at->toTimeString(),
+                ]);
             }
         } else {
-            $expireText .= 'Geef aan of je mee wilt doen met de komende match.';
+            $expireText .= trans('event-initiation.choose_for_next_match');
         }
 
         $user = getSlackUser($this->input['user_id']);
 
         $res = sendSlackMessage([
             'channel' => $this->input['channel_id'],
-            'text' => 'Nieuwe match geïnitieerd!',
+            'text' => trans('event-initiation.match_initiated'),
             'blocks' => [
                 [
                     'type' => 'section',
@@ -86,11 +86,23 @@ class InitiateMatch implements ShouldQueue
                     'elements' => [
                         [
                             'type' => 'plain_text',
-                            'text' => '1 potentiële speler(s)',
+                            'text' => trans_choice(
+                                'event-initiation.potential_players',
+                                1,
+                                [
+                                    'amount' => 1,
+                                ]
+                            ),
                         ],
                         [
                             'type' => 'plain_text',
-                            'text' => '0 afwijzende speler(s)',
+                            'text' => trans_choice(
+                                'event-initiation.refusing_players',
+                                0,
+                                [
+                                    'amount' => 0,
+                                ]
+                            ),
                         ],
                     ],
                 ],
@@ -107,16 +119,16 @@ class InitiateMatch implements ShouldQueue
                             'value' => 'participate',
                             'text' => [
                                 'type' => 'plain_text',
-                                'text' => 'Meedoen',
+                                'text' => trans('event-initiation.participate'),
                             ],
                         ],
                         [
                             'type' => 'button',
                             'style' => 'danger',
-                            'value' => 'decline',
+                            'value' => 'refuse',
                             'text' => [
                                 'type' => 'plain_text',
-                                'text' => 'Afwijzen',
+                                'text' => trans('event-initiation.refuse'),
                             ],
                         ],
                     ],
@@ -182,7 +194,7 @@ class InitiateMatch implements ShouldQueue
                 'value' => 'start_now',
                 'text' => [
                     'type' => 'plain_text',
-                    'text' => 'Nu beginnen',
+                    'text' => trans('event-initiation.start_now'),
                 ],
             ],
             [
@@ -190,7 +202,7 @@ class InitiateMatch implements ShouldQueue
                 'type' => 'static_select',
                 'placeholder' => [
                     'type' => 'plain_text',
-                    'text' => 'Wachttijd wijzigen',
+                    'text' => trans('event-initiation.change_wait_time'),
                 ],
                 'options' => $waitTimeOptions,
             ],

@@ -35,7 +35,7 @@ class MatchController extends Controller
         // Check if invalid wait time has been provided
         if (strlen($request->input('text') > 0) && !is_numeric($request->input('text'))) {
             return new JsonResponse([
-                'text' => 'Geef een geldige wachttijd op.',
+                'text' => trans('event-initiation.provide_valid_wait_time'),
             ], Response::HTTP_OK);
         }
 
@@ -43,7 +43,7 @@ class MatchController extends Controller
 
         return new JsonResponse([
             'response_type' => 'in_channel',
-            'text' => 'Een nieuwe match wordt geïnitieerd.',
+            'text' => trans('event-initiation.match_will_be_initiated'),
         ], Response::HTTP_OK);
     }
 
