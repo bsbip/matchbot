@@ -225,7 +225,7 @@ class Interact implements ShouldQueue
      *
      * @author Ramon Bakker <ramonbakker@rambit.nl>
      */
-    private function getEventInitiationUsers($id): Collection
+    private function getEventInitiationUsers(int $id): Collection
     {
         return EventInitiationUser::where('event_initiation_id', $id)
             ->orderBy('updated_at', 'desc')
@@ -242,7 +242,7 @@ class Interact implements ShouldQueue
      *
      * @author Ramon Bakker <ramonbakker@rambit.nl>
      */
-    private function saveEventInitiationUser($eventInitiation, $participate): EventInitiationUser
+    private function saveEventInitiationUser(EventInitiation $eventInitiation, bool $participate): EventInitiationUser
     {
         $eventInitiationUser = EventInitiationUser::firstOrCreate([
             'user_id' => $this->payload->user->id,

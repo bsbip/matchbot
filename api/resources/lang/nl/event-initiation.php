@@ -19,5 +19,5 @@ return [
     'match_time_changed_to' => 'De matchtijd is aangepast naar :time.',
     'match_time_changed_from_to' => 'De matchtijd is aangepast van :from_time naar :to_time.',
     'match_time_changed_at_by_user' => 'De wachttijd voor initiatie :id is om :time aangepast door :user.',
-    'initiation_expires_in_short_time' => 'Initiatie :id verloopt bijna! Geef snel nog je keuze aan als je dat nog niet hebt gedaan.',
+    'initiation_expires_in_short_time' => 'Initiatie :id voor de match van :time verloopt bijna! Geef snel nog je keuze aan als je dat nog niet hebt gedaan.',
 ];

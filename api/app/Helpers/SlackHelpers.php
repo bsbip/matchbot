@@ -111,7 +111,8 @@ function scheduleSlackMessage(EventInitiation $eventInitiation, string $channelI
     $permalink = getSlackMessagePermalink($eventInitiation->message_ts, $channelId);
     $expireAt = Carbon::parse($eventInitiation->expire_at);
 
-    if ($expireAt->lessThanOrEqualTo(now()->subMinutes(Config::get('initiation.scheduled_message_offset')))) {
+    // Check if time before expiration is not enough
+    if ($expireAt->diffInMinutes(now()) < Config::get('initiation.scheduled_message_offset')) {
         return;
     }
 
@@ -119,6 +120,7 @@ function scheduleSlackMessage(EventInitiation $eventInitiation, string $channelI
         'channel' => $channelId,
         'text' => trans('event-initiation.initiation_expires_in_short_time', [
             'id' => "<{$permalink->permalink}|$eventInitiation->id>",
+            'time' => $expireAt->toTimeString(),
         ]),
         'post_at' => $expireAt
             ->subMinutes(Config::get('initiation.scheduled_message_offset'))

@@ -168,6 +168,7 @@ class InitiateMatch implements ShouldQueue
      * Get control elements for the initiation.
      *
      * @return array
+     *
      * @author Ramon Bakker <ramonbakker@rambit.nl>
      */
     private function getControlElements(): array
