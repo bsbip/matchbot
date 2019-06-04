@@ -7,6 +7,7 @@ use App\EventInitiation;
 use App\EventInitiationUser;
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Config;
 use App\Jobs\CreateMatchFromInitiation;
@@ -48,7 +49,7 @@ class InitiateMatch implements ShouldQueue
             $expireText = '';
         }
 
-        if (strlen($this->input['text']) > 0) {
+        if (isset($this->input['text']) && strlen($this->input['text']) > 0) {
             $eventInitiation->expire_at = Carbon::parse($this->input['text']);
             $expireText .= trans('event-initiation.choose_for_match_with_time', [
                 'time' => $eventInitiation->expire_at->toTimeString(),
@@ -57,7 +58,15 @@ class InitiateMatch implements ShouldQueue
             $expireText .= trans('event-initiation.choose_for_next_match');
         }
 
-        $user = getSlackUser($this->input['user_id']);
+        if (isset($this->input['user_id'])) {
+            $user = getSlackUser($this->input['user_id']);
+            $usersChosenText = ":heavy_check_mark: {$user->profile->real_name}";
+            $potentialPlayersAmount = 1;
+        } else {
+            $user = null;
+            $usersChosenText = trans('event-initiation.nobody_chose');
+            $potentialPlayersAmount = 0;
+        }
 
         $res = sendSlackMessage([
             'channel' => $this->input['channel_id'],
@@ -75,7 +84,7 @@ class InitiateMatch implements ShouldQueue
                     'elements' => [
                         [
                             'type' => 'plain_text',
-                            'text' => ":heavy_check_mark: {$user->profile->real_name}",
+                            'text' => $usersChosenText,
                             'emoji' => true,
                         ],
                     ],
@@ -87,9 +96,9 @@ class InitiateMatch implements ShouldQueue
                             'type' => 'plain_text',
                             'text' => trans_choice(
                                 'event-initiation.potential_players',
-                                1,
+                                $potentialPlayersAmount,
                                 [
-                                    'amount' => 1,
+                                    'amount' => $potentialPlayersAmount,
                                 ]
                             ),
                         ],
@@ -137,20 +146,29 @@ class InitiateMatch implements ShouldQueue
 
         $responseBody = json_decode($res->getBody());
 
-        $eventInitiation->fill([
-            'message_ts' => $responseBody->ts,
-            'user_id' => $this->input['user_id'],
-        ]);
+        if (!isset($responseBody->ts)) {
+            Log::error('Failed to post Slack message for event initiation.');
+
+            return;
+        }
+
+        $eventInitiation->message_ts = $responseBody->ts;
+
+        if (isset($this->input['user_id'])) {
+            $eventInitiation->user_id = $this->input['user_id'];
+        }
 
         DB::beginTransaction();
 
         $eventInitiation->save();
 
-        EventInitiationUser::create([
-            'user_id' => $this->input['user_id'],
-            'event_initiation_id' => $eventInitiation->id,
-            'participate' => true,
-        ]);
+        if (!is_null($user)) {
+            EventInitiationUser::create([
+                'user_id' => $this->input['user_id'],
+                'event_initiation_id' => $eventInitiation->id,
+                'participate' => true,
+            ]);
+        }
 
         if (!is_null($eventInitiation->expire_at)) {
             scheduleSlackMessage($eventInitiation, $this->input['channel_id']);
