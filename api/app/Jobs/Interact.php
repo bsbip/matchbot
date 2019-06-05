@@ -177,6 +177,10 @@ class Interact implements ShouldQueue
 
             $eventInitiation->save();
 
+            if (is_null($user)) {
+                $user = getSlackUser($this->payload->user->id);
+            }
+
             sendSlackMessage([
                 'channel' => $this->payload->channel->id,
                 'text' => trans('event-initiation.match_time_changed_at_by_user', [
