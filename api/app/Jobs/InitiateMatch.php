@@ -212,6 +212,15 @@ class InitiateMatch implements ShouldQueue
 
         return [
             [
+                'action_id' => 'wait_time_select',
+                'type' => 'static_select',
+                'placeholder' => [
+                    'type' => 'plain_text',
+                    'text' => trans('event-initiation.change_wait_time'),
+                ],
+                'options' => $waitTimeOptions,
+            ],
+            [
                 'type' => 'button',
                 'value' => 'start_now',
                 'text' => [
@@ -220,13 +229,12 @@ class InitiateMatch implements ShouldQueue
                 ],
             ],
             [
-                'action_id' => 'wait_time_select',
-                'type' => 'static_select',
-                'placeholder' => [
+                'type' => 'button',
+                'value' => 'schedule_again',
+                'text' => [
                     'type' => 'plain_text',
-                    'text' => trans('event-initiation.change_wait_time'),
+                    'text' => trans('event-initiation.schedule_again'),
                 ],
-                'options' => $waitTimeOptions,
             ],
         ];
     }

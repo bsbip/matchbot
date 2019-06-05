@@ -355,35 +355,6 @@ class MatchController extends Controller
     }
 
     /**
-     * Get Slack user list.
-     *
-     * @param  string $token the Slack token
-     *
-     * @return object
-     *
-     * @author Ramon Bakker <ramonbakker@rambit.nl>
-     */
-    private function getSlackUserList(string $token): object
-    {
-        $client = new \GuzzleHttp\Client();
-
-        try {
-            $res = $client->get(env('SLACK_API_URL') . '/users.list', [
-                'query' => [
-                    'token' => $token,
-                    'pretty' => 1,
-                    'presence' => 1,
-                ],
-            ]);
-        } catch (Exception $e) {
-            // Failed to get data
-            return [];
-        }
-
-        return json_decode($res->getBody())->members;
-    }
-
-    /**
      * Get the help text.
      *
      * @param  object $users Slack users
@@ -790,7 +761,7 @@ class MatchController extends Controller
             ],
             [
                 'title' => 'Commentaar',
-                'text' => $record[0]->note,
+                'text' => $record[0]->note === '' ? '-' : $record[0]->note,
             ],
             [
                 'fallback' => "\n<" . env('APP_URL') . '|Bekijken>',

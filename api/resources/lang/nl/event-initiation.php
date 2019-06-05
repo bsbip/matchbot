@@ -1,12 +1,14 @@
 <?php
 
 return [
-    'provide_valid_wait_time' => 'Geef een geldige wachttijd op.',
+    'provide_valid_wait_time' => 'Geef een geldige wachttijd of matchtijd op.',
     'match_will_be_initiated' => 'Een nieuwe match wordt geïnitieerd.',
     'match_already_created' => 'Er is al een match aangemaakt voor initiatie :id.',
     'cannot_choose' => 'Het is niet meer mogelijk om je keuze aan te geven.',
-    'cannot_choose_wait_time' => 'Het is niet meer mogelijk om een wachttijd te kiezen, omdat de oorspronkelijke wachttijd reeds is verstreken. Er zal een match worden aangemaakt zodra er voldoende belangstellenden zijn.',
-    'cannot_start' => 'Het is niet meer mogelijk om een match zelf te laten beginnen, omdat de oorspronkelijke wachttijd reeds is verstreken. Er zal een match worden aangemaakt zodra er voldoende belangstellenden zijn.',
+    'cannot_choose_wait_time' => 'Het is niet meer mogelijk om een wachttijd te kiezen, omdat de oorspronkelijke wachttijd reeds is verstreken. Er zal een match worden aangemaakt zodra er voldoende belangstellenden zijn, tenzij de match opnieuw wordt ingepland.',
+    'cannot_start' => 'Het is niet meer mogelijk om een match zelf te laten beginnen, omdat de oorspronkelijke wachttijd reeds is verstreken. Er zal een match worden aangemaakt zodra er voldoende belangstellenden zijn, tenzij de match opnieuw wordt ingepland.',
+    'cannot_schedule' => 'Het is niet meer mogelijk om een match opnieuw in te plannen, omdat er al een match is gemaakt of wordt geprobeerd te maken.',
+    'cannot_create_match' => 'Er zijn momenteel onvoldoende belangstellenden voor een match. Er zal een match worden aangemaakt zodra er voldoende belangstellenden zijn, tenzij de match opnieuw wordt ingepland.',
     'potential_players' => ':amount potentiële speler|:amount potentiële spelers',
     'refusing_players' => ':amount afwijzende speler|:amount afwijzende spelers',
     'choose_for_next_match' => 'Geef aan of je mee wilt doen met de komende match.',
@@ -21,4 +23,6 @@ return [
     'match_time_changed_at_by_user' => 'De wachttijd voor initiatie :id is om :time aangepast door :user.',
     'initiation_expires_in_short_time' => 'Initiatie :id voor de match van :time verloopt bijna! Geef snel nog je keuze aan als je dat nog niet hebt gedaan.',
     'nobody_chose' => 'Er heeft nog niemand gekozen. Wees de eerste!',
+    'schedule_again' => 'Opnieuw inplannen',
+    'scheduled_match_reset' => 'De matchtijd is niet langer :time en wordt nader bepaald.',
 ];

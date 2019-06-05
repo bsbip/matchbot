@@ -35,7 +35,7 @@ function createMatch(array $activeUsers, bool $random = true, $eventInitiation =
 
     if (sizeof($activeUsers) < Config::get('match.min_users')) {
         if (isset($eventInitiation)) {
-            $responseText = 'Er zijn momenteel onvoldoende belangstellenden voor een match. Er zal een match worden aangemaakt zodra er voldoende belangstellenden zijn.';
+            $responseText = trans('event-initiation.cannot_create_match');
 
             $eventInitiation->start_when_possible = true;
             $eventInitiation->save();

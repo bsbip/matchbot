@@ -71,7 +71,11 @@ class Interact implements ShouldQueue
                 }
             } elseif (isset($action->value)) {
                 if (in_array($action->value, ['participate', 'refuse'])) {
-                    if (isset($eventInitiation->event_id) || (isset($eventInitiation->expire_at) && $expireAtObj->diffInSeconds(now()) < $matchCreationWaitTime)) {
+                    if (
+                        isset($eventInitiation->event_id) ||
+                        (isset($eventInitiation->expire_at) &&
+                            $expireAtObj->diffInSeconds(now()) < $matchCreationWaitTime)
+                    ) {
                         sendSlackMessage([
                             'channel' => $this->payload->channel->id,
                             'user' => $this->payload->user->id,
@@ -95,6 +99,22 @@ class Interact implements ShouldQueue
                     }
 
                     $eventInitiation->expire_at = now();
+                } elseif ($action->value === 'schedule_again' && isset($eventInitiation->expire_at)) {
+                    if (
+                        isset($eventInitiation->event_id) ||
+                        $expireAtObj->diffInSeconds(now()) < $matchCreationWaitTime
+                    ) {
+                        sendSlackMessage([
+                            'channel' => $this->payload->channel->id,
+                            'user' => $this->payload->user->id,
+                            'text' => trans('event-initiation.cannot_schedule'),
+                        ], 'postEphemeral');
+
+                        return;
+                    }
+
+                    $eventInitiation->expire_at = null;
+                    $eventInitiation->start_when_possible = false;
                 }
             }
         }
@@ -153,24 +173,35 @@ class Interact implements ShouldQueue
         ];
 
         // Create a match if initiation already expired and amount of
-        // participants is now high enough
-        if ($expireAtObj->lessThan(now()) && $amountOfParticipants >= Config::get('match.min_users')) {
+        // participants is now high enough and the scheduled match is not reset.
+        if (
+            $expireAtObj->lessThan(now()) &&
+            $amountOfParticipants >= Config::get('match.min_users') &&
+            $eventInitiation->getOriginal('start_when_possible')
+        ) {
             deleteEventInitiationScheduledSlackMessages($eventInitiation->id);
             CreateMatchFromInitiation::dispatch($eventInitiation->id);
         } elseif ($eventInitiation->isDirty('expire_at')) {
-            $blocks[0]->text->text = trans('event-initiation.choose_for_match_with_time', [
-                'time' => $eventInitiation->expire_at->toTimeString(),
-            ]);
-
-            if (is_null($eventInitiation->getOriginal('expire_at'))) {
-                $matchTimeText = trans('event-initiation.match_time_changed_to', [
-                    'time' => $eventInitiation->expire_at->toTimeString(),
+            if (is_null($eventInitiation->expire_at)) {
+                $blocks[0]->text->text = trans('event-initiation.choose_for_next_match');
+                $matchTimeText = trans('event-initiation.scheduled_match_reset', [
+                    'time' => Carbon::parse($eventInitiation->getOriginal('expire_at'))->toTimeString(),
                 ]);
             } else {
-                $matchTimeText = trans('event-initiation.match_time_changed_from_to', [
-                    'from_time' => Carbon::parse($eventInitiation->getOriginal('expire_at'))->toTimeString(),
-                    'to_time' => $eventInitiation->expire_at->toTimeString(),
+                $blocks[0]->text->text = trans('event-initiation.choose_for_match_with_time', [
+                    'time' => $eventInitiation->expire_at->toTimeString(),
                 ]);
+
+                if (is_null($eventInitiation->getOriginal('expire_at'))) {
+                    $matchTimeText = trans('event-initiation.match_time_changed_to', [
+                        'time' => $eventInitiation->expire_at->toTimeString(),
+                    ]);
+                } else {
+                    $matchTimeText = trans('event-initiation.match_time_changed_from_to', [
+                        'from_time' => Carbon::parse($eventInitiation->getOriginal('expire_at'))->toTimeString(),
+                        'to_time' => $eventInitiation->expire_at->toTimeString(),
+                    ]);
+                }
             }
 
             deleteEventInitiationScheduledSlackMessages($eventInitiation->id);
@@ -178,6 +209,7 @@ class Interact implements ShouldQueue
             $eventInitiation->save();
 
             if (is_null($user)) {
+                // User did not chose, but changed match time
                 $user = getSlackUser($this->payload->user->id);
             }
 
@@ -190,13 +222,15 @@ class Interact implements ShouldQueue
                 ]) . ' ' . $matchTimeText,
             ]);
 
-            if (Carbon::parse($eventInitiation->expire_at)->lessThanOrEqualTo(now())) {
-                CreateMatchFromInitiation::dispatch($eventInitiation->id);
-            } else {
-                CreateMatchFromInitiation::dispatch($eventInitiation->id)
-                    ->delay($eventInitiation->expire_at);
+            if (!is_null($eventInitiation->expire_at)) {
+                if (Carbon::parse($eventInitiation->expire_at)->lessThanOrEqualTo(now())) {
+                    CreateMatchFromInitiation::dispatch($eventInitiation->id);
+                } else {
+                    CreateMatchFromInitiation::dispatch($eventInitiation->id)
+                        ->delay($eventInitiation->expire_at);
 
-                scheduleSlackMessage($eventInitiation, $this->payload->channel->id);
+                    scheduleSlackMessage($eventInitiation, $this->payload->channel->id);
+                }
             }
         }
 

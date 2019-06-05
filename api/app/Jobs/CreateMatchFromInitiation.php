@@ -39,6 +39,7 @@ class CreateMatchFromInitiation implements ShouldQueue
         $eventInitiation = EventInitiation::where(function ($query) {
             $query->where('start_when_possible', false)
                 ->where('expire_at', '<=', now()->toDateTimeString())
+                ->whereNotNull('expire_at')
                 ->whereNull('event_id');
         })
             ->orWhere(function ($query) {
