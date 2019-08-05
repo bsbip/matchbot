@@ -27,13 +27,13 @@ class CalculatePoints implements ShouldQueue
                 'points' => 50,
             ]);
 
-        $matches = Event::where('events.status', 1)
+        Event::where('events.status', 1)
             ->with('eventTeams.result')
-            ->get();
-
-        foreach ($matches as $match) {
-            $this->calculatePoints($match);
-        }
+            ->chunk(100, function ($matches) {
+                foreach ($matches as $match) {
+                    $this->calculatePoints($match);
+                }
+            });
     }
 
     /**
