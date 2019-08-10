@@ -3,13 +3,13 @@
 namespace App\Jobs;
 
 use App\Event;
-use App\Player;
 use App\EventTeam;
+use App\Player;
 use Illuminate\Bus\Queueable;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 
 class CalculatePoints implements ShouldQueue
 {
@@ -28,7 +28,9 @@ class CalculatePoints implements ShouldQueue
             ]);
 
         Event::where('events.status', 1)
-            ->with('eventTeams.result')
+            ->with(['eventTeams' => function ($query) {
+                $query->with(['result', 'players']);
+            }])
             ->chunk(100, function ($matches) {
                 foreach ($matches as $match) {
                     $this->calculatePoints($match);
