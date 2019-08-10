@@ -3,20 +3,27 @@
 namespace App\Jobs;
 
 use App\Event;
-use App\Player;
 use App\EventTeam;
+use App\Player;
 use Illuminate\Bus\Queueable;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 
 class CalculatePoints implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
-     * Execute the job.
+     * collection of players
+     *
+     * @var Collection
+     */
+    protected $players;
+
+    /**
+     * Execute the console command.
      *
      * @return void
      */
@@ -27,13 +34,25 @@ class CalculatePoints implements ShouldQueue
                 'points' => 50,
             ]);
 
+        $this->players = Player::where('status', 1)->get();
+
         Event::where('events.status', 1)
-            ->with('eventTeams.result')
+            ->with([
+                'eventTeams' => function ($query) {
+                    $query->with([
+                        'result', 'players',
+                    ]);
+                },
+            ])
             ->chunk(100, function ($matches) {
                 foreach ($matches as $match) {
                     $this->calculatePoints($match);
                 }
             });
+
+        $this->players->each(function ($player) {
+            $player->save();
+        });
     }
 
     /**
@@ -72,13 +91,9 @@ class CalculatePoints implements ShouldQueue
      */
     public function calculatePointsForTeam(EventTeam $team): int
     {
-        $points = 0;
-
-        foreach ($team->players as $player) {
-            $points += $player->points;
-        }
-
-        return $points;
+        return $this->players->filter(function ($player) use ($team) {
+            return in_array($player->name, $team->players->pluck('name')->toArray());
+        })->sum('points');
     }
 
     /**
@@ -106,16 +121,22 @@ class CalculatePoints implements ShouldQueue
                 $points = -($basePoints / $fairnessCorrection);
             }
         }
+
         $team->pointsAcquired = round($points);
 
         foreach ($team->players as $player) {
-            $player->points += $this->setPointsPerPlayer($player, $team);
+            $this->players->transform(function ($playerToChange) use ($player, $team) {
 
-            if ($player->points < 0) {
-                $player->points = 0;
-            }
+                if ($playerToChange->name === $player->name) {
+                    $playerToChange->points += $this->setPointsPerPlayer($playerToChange, $team);
+                }
 
-            $player->save();
+                if ($playerToChange->points < 0) {
+                    $playerToChange->points = 0;
+                }
+
+                return $playerToChange;
+            });
         }
 
         return $team;
@@ -129,20 +150,19 @@ class CalculatePoints implements ShouldQueue
      *
      * @return float
      */
-    public function setPointsPerPlayer($player, $team): float
+    public function setPointsPerPlayer(Player $player, EventTeam $team): float
     {
-        if ($team->points == 0) {
+        $percentage = ($player->points / $team->points);
+
+        if ($team->points === 0) {
             $percentage = 0.50;
-        } else {
-            $percentage = ($player->points / $team->points);
         }
 
         if ($team->win) {
             $percentage = (1 - $percentage);
         }
-        $points = ($team->pointsAcquired * $percentage);
 
-        return round($points);
+        return round(($team->pointsAcquired * $percentage));
     }
 
     /**
@@ -153,7 +173,7 @@ class CalculatePoints implements ShouldQueue
      *
      * @return bool
      */
-    public function isWinner($team, $opponent): bool
+    public function isWinner(EventTeam $team, EventTeam $opponent): bool
     {
         return $team->result->score > $opponent->result->score;
     }
