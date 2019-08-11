@@ -81,93 +81,82 @@ class StatsController extends Controller
     public function getTotalStats(string $period = '', string $orderBy = 'id', string $orderDirection = 'asc'): JsonResponse
     {
         $data = [];
-        $periodSet = $period != '' && $period != 'all-time' ? true : false;
+        $periodSet = $period !== '' && $period !== 'all-time';
 
         if ($orderBy == 'player') {
             $orderBy = 'name';
         }
 
-        $players = Player::when($orderBy == 'id' || $orderBy == 'name', function ($q) use ($orderBy, $orderDirection) {
-            return $q->orderBy($orderBy, $orderDirection);
+        $players = Player::when($orderBy == 'id' || $orderBy == 'name', function ($query) use ($orderBy, $orderDirection) {
+            $query->orderBy($orderBy, $orderDirection);
         })
+            ->with(['results' => function ($query) use ($periodSet, $period) {
+                $query
+                    ->where('results.deleted', false)
+                    ->with(['event.results'])
+                    ->when($periodSet, function ($query) use ($period) {
+                        switch ($period) {
+                            case 'today':
+                                $period = date('Y-m-d 00:00:00');
+                                $periodEnd = date('Y-m-d H:i:s');
+                                break;
+                            case 'yesterday':
+                                $period = new \DateTime();
+                                $period->sub(new \DateInterval('P1D'));
+                                $period = $period->format('Y-m-d 00:00:00');
+                                $periodEnd = date('Y-m-d 00:00:00');
+                                break;
+                            case 'current-week':
+                                $period = date('Y-m-d 00:00:00', strtotime('-' . date('w') . ' days'));
+                                $periodEnd = date('Y-m-d H:i:s');
+                                break;
+                            case '7-days':
+                                $period = new \DateTime();
+                                $period = $period->sub(new \DateInterval('P7D'))->format('Y-m-d 00:00:00');
+                                $periodEnd = date('Y-m-d H:i:s');
+                                break;
+                            case '30-days':
+                                $period = new \DateTime();
+                                $period = $period->sub(new \DateInterval('P30D'))->format('Y-m-d 00:00:00');
+                                $periodEnd = date('Y-m-d H:i:s');
+                                break;
+                            case 'current-month':
+                                $period = date('Y-m-01 00:00:00');
+                                $periodEnd = date('Y-m-d H:i:s');
+                                break;
+                            default:
+                                return;
+                        }
+
+                        $query->whereBetween('results.created_at', [
+                            $period,
+                            $periodEnd,
+                        ]);
+                    });
+            }])
             ->get();
 
         foreach ($players as $player) {
-            $stats = Result::join('team_players AS tp', 'tp.team_id', '=', 'results.team_id')
-                ->where('tp.player_id', $player->id)
-                ->where('results.deleted', false)
-                ->join('results AS team2', function ($j) {
-                    $j->on('team2.event_id', '=', 'results.event_id');
-                    $j->on('team2.team_id', '!=', 'results.team_id');
-                })
-                ->when($periodSet, function ($q) use ($period) {
-                    switch ($period) {
-                        case 'today':
-                            $period = date('Y-m-d 00:00:00');
-                            $periodEnd = date('Y-m-d H:i:s');
-                            break;
-                        case 'yesterday':
-                            $period = new \DateTime();
-                            $period->sub(new \DateInterval('P1D'));
-                            $period = $period->format('Y-m-d 00:00:00');
-                            $periodEnd = date('Y-m-d 00:00:00');
-                            break;
-                        case 'current-week':
-                            $period = date('Y-m-d 00:00:00', strtotime('-' . date('w') . ' days'));
-                            $periodEnd = date('Y-m-d H:i:s');
-                            break;
-                        case '7-days':
-                            $period = new \DateTime();
-                            $period = $period->sub(new \DateInterval('P7D'))->format('Y-m-d 00:00:00');
-                            $periodEnd = date('Y-m-d H:i:s');
-                            break;
-                        case '30-days':
-                            $period = new \DateTime();
-                            $period = $period->sub(new \DateInterval('P30D'))->format('Y-m-d 00:00:00');
-                            $periodEnd = date('Y-m-d H:i:s');
-                            break;
-                        case 'current-month':
-                            $period = date('Y-m-01 00:00:00');
-                            $periodEnd = date('Y-m-d H:i:s');
-                            break;
-                        default:
-                            return;
-                    }
-
-                    return $q->whereBetween('results.created_at', [
-                        $period,
-                        $periodEnd,
-                    ]);
-                })
-                ->get([
-                    'tp.player_id',
-                    'results.score',
-                    'results.crawl_score',
-                    'team2.score AS team2_score',
-                ]);
 
             $playerStats = new \stdClass();
 
-            foreach ($stats as $stat) {
-                if (sizeof(get_object_vars($playerStats)) === 0) {
-                    $playerStats->id = $player->id;
-                    $playerStats->name = $player->name;
-                    $playerStats->user_id = $player->user_id;
-                    $playerStats->matches = 1;
-                    $playerStats->score = $stat->score;
-                    $playerStats->crawl_score = $stat->crawl_score;
-                    $playerStats->won = 0;
-                    $playerStats->lost = 0;
-                    $playerStats->draw = 0;
-                } else {
-                    $playerStats->matches++;
-                    $playerStats->score += $stat->score;
-                    $playerStats->crawl_score += $stat->crawl_score;
-                }
+            $playerStats->score = $player->results->sum('score');
+            $playerStats->matches = $player->results->count() ?: 1;
+            $playerStats->crawl_score = $player->results->sum('crawl_score');
+            $playerStats->user_id = $player->user_id;
+            $playerStats->name = $player->name;
+            $playerStats->id = $player->id;
+            $playerStats->won = 0;
+            $playerStats->lost = 0;
+            $playerStats->draw = 0;
 
-                if ($stat->score > $stat->team2_score) {
+            foreach ($player->results as $stat) {
+
+                $team2Score = $stat->event->results->firstWhere('team_id', '!=', $stat->team_id)->score;
+
+                if ($stat->score > $team2Score) {
                     $playerStats->won++;
-                } elseif ($stat->score < $stat->team2_score) {
+                } elseif ($stat->score < $team2Score) {
                     $playerStats->lost++;
                 } else {
                     $playerStats->draw++;
