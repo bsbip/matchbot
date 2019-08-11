@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Team;
 use App\Player;
 use App\Result;
+use App\Team;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 /**
  * Actions for statistics
@@ -310,12 +310,14 @@ class StatsController extends Controller
                 $w->when($periodSet, function ($w2) use ($startDate, $endDate) {
                     $w2->whereBetween('created_at', [$startDate, $endDate]);
                 });
+                $w->has('results');
             })
             ->with(['results.event' => function ($w) use ($startDate, $endDate, $periodSet) {
                 $w->where('status', 1);
                 $w->when($periodSet, function ($w2) use ($startDate, $endDate) {
                     $w2->whereBetween('created_at', [$startDate, $endDate]);
                 });
+                $w->with(['results']);
             }])
             ->get();
 
@@ -339,13 +341,12 @@ class StatsController extends Controller
             ];
 
             foreach ($team->results as $result) {
-                $otherResult = Result::where('event_id', $result->event_id)
-                    ->where('team_id', '!=', $result->team_id)
-                    ->first(['score']);
 
-                if (!isset($otherResult) || !isset($result->event)) {
+                if (!isset($result->event)) {
                     continue;
                 }
+
+                $otherResult = $result->event->results->firstWhere('team_id', '!=', $result->team_id);
 
                 $stats['totalgames']++;
                 $stats['totalscore'] += $result->score;
