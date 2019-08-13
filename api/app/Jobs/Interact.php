@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Player;
 use Carbon\Carbon;
 use App\EventInitiation;
 use App\EventInitiationUser;
@@ -122,7 +123,7 @@ class Interact implements ShouldQueue
         $eventInitiationUsers = $this->getEventInitiationUsers($eventInitiation->id);
         $blocks = $this->payload->message->blocks;
         $playerElements = [];
-        $user = null;
+        $userRealName = null;
         $amountOfParticipants = 0;
         $amountOfRefusers = 0;
 
@@ -135,15 +136,21 @@ class Interact implements ShouldQueue
                 $amountOfRefusers++;
             }
 
-            $eventInitiationSlackUser = getSlackUser($eventInitiationUser->user_id);
+            if ($eventInitiationUser->player === null) {
+                // Player does not exist in database.
+                // Get real name of user by making a Slack API request.
+                $eventInitiationSlackUserRealName = getSlackUser($eventInitiationUser->user_id)->profile->real_name;
+            } else {
+                $eventInitiationSlackUserRealName = $eventInitiationUser->player->name;
+            }
 
             if ($eventInitiationUser->user_id === $this->payload->user->id) {
-                $user = $eventInitiationSlackUser;
+                $userRealName = $eventInitiationSlackUserRealName;
             }
 
             $playerElements[] = [
                 'type' => 'plain_text',
-                'text' => "{$emoji} {$eventInitiationSlackUser->profile->real_name}",
+                'text' => "{$emoji} {$eventInitiationSlackUserRealName}",
                 'emoji' => true,
             ];
         }
@@ -208,9 +215,16 @@ class Interact implements ShouldQueue
 
             $eventInitiation->save();
 
-            if (is_null($user)) {
+            if (is_null($userRealName)) {
                 // User did not chose, but changed match time
-                $user = getSlackUser($this->payload->user->id);
+                $player = Player::where('user_id', $this->payload->user->id)
+                    ->first();
+
+                if ($player === null) {
+                    $userRealName = getSlackUser($this->payload->user->id)->profile->real_name;
+                } else {
+                    $userRealName = $player->profile->real_name;
+                }
             }
 
             sendSlackMessage([
@@ -218,7 +232,7 @@ class Interact implements ShouldQueue
                 'text' => trans('event-initiation.match_time_changed_at_by_user', [
                     'id' => $eventInitiation->id,
                     'time' => now()->toTimeString(),
-                    'user' => $user->profile->real_name,
+                    'user' => $userRealName,
                 ]) . ' ' . $matchTimeText,
             ]);
 
@@ -266,6 +280,7 @@ class Interact implements ShouldQueue
     private function getEventInitiationUsers(int $id): Collection
     {
         return EventInitiationUser::where('event_initiation_id', $id)
+            ->with(['player'])
             ->orderBy('updated_at', 'desc')
             ->get();
     }
