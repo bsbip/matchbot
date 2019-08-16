@@ -223,7 +223,7 @@ class Interact implements ShouldQueue
                 if ($player === null) {
                     $userRealName = getSlackUser($this->payload->user->id)->profile->real_name;
                 } else {
-                    $userRealName = $player->profile->real_name;
+                    $userRealName = $player->name;
                 }
             }
 
