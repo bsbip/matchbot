@@ -372,8 +372,10 @@ class StatsController extends Controller
         }
 
         if (in_array($sort, $sortOptions)) {
-            $data = $data->sortByDesc($sort)->values();
+            $data = $data->sortByDesc($sort);
         }
+
+        $data = $data->values();
 
         return new JsonResponse([
             'data' => $data->toArray(),
