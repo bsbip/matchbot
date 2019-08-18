@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpService } from 'src/app/services/http.service';
 import { ActivatedRoute } from '@angular/router';
+import { ApiResponse } from 'src/app/types/api-response';
 
 @Component({
     selector: 'app-results',
@@ -18,7 +19,7 @@ export class ResultsComponent implements OnInit {
     public team1Name = '';
     public team2Name = '';
     public results: any = {};
-    public resResult: ApiResponse = {};
+    public resResult: ApiResponse<void> = {};
 
     constructor(
         private httpService: HttpService,

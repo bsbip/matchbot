@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpService } from 'src/app/services/http.service';
+import { ApiResponse } from 'src/app/types/api-response';
 
 @Component({
     selector: 'app-statistics',
@@ -173,7 +174,7 @@ export class StatisticsComponent implements OnInit {
     public orderByDefault = 19;
     public orderBy = this.orderOptions[19];
     public statsLimit = 40;
-    public resResult: ApiResponse = {};
+    public resResult: ApiResponse<void> = {};
 
     constructor(private httpService: HttpService) {}
 
