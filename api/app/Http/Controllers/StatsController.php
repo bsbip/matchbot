@@ -8,6 +8,7 @@ use App\Team;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
 /**
  * Actions for statistics
@@ -146,6 +147,8 @@ class StatsController extends Controller
             $playerStats->user_id = $player->user_id;
             $playerStats->name = $player->name;
             $playerStats->id = $player->id;
+            $playerStats->score_avg = number_format($player->results->average('score'), 2);
+            $playerStats->crawl_score_avg = number_format($player->results->average('crawl_score'), 2);
             $playerStats->won = 0;
             $playerStats->lost = 0;
             $playerStats->draw = 0;
@@ -161,11 +164,6 @@ class StatsController extends Controller
                 } else {
                     $playerStats->draw++;
                 }
-            }
-
-            if (isset($playerStats->score) && isset($playerStats->matches)) {
-                $playerStats->score_avg = number_format($playerStats->score / $playerStats->matches, 2);
-                $playerStats->crawl_score_avg = number_format($playerStats->crawl_score / $playerStats->matches, 2);
             }
 
             if (sizeof(get_object_vars($playerStats)) > 0) {
@@ -262,37 +260,42 @@ class StatsController extends Controller
      */
     public function getDuoStats(string $period = '', string $sort = 'winlose'): JsonResponse
     {
-        $data = [];
-        $startDate = null;
         $endDate = null;
+        $startDate = null;
+        $now = Carbon::now();
+        $data = new Collection();
 
         switch ($period) {
             case 'current-month':
                 $periodSet = true;
-                $startDate = Carbon::now()->startOfMonth();
-                $endDate = Carbon::now()->endOfMonth();
+                $startDate = $now->startOfMonth();
+                $endDate = $now->endOfMonth();
                 break;
             case 'current-week':
                 $periodSet = true;
-                $startDate = Carbon::now()->startOfWeek();
-                $endDate = Carbon::now()->endOfWeek();
+                $startDate = $now->startOfWeek();
+                $endDate = $now->endOfWeek();
                 break;
             case 'today':
                 $periodSet = true;
-                $startDate = date('Y-m-d 00:00:00');
-                $endDate = date('Y-m-d 23:59:59');
+                $startDate = $now->startOfDay();
+                $endDate = $now->endOfDay();
+                break;
+            case 'yesterday':
+                $periodSet = true;
+                $startDate = $now->yesterday()->startOfDay();
+                $endDate = $now->yesterday()->endOfDay();
                 break;
             case '7-days':
                 $periodSet = true;
-                $startDate = date('Y-m-d H:i:s', strtotime('-7 DAY'));
-                $endDate = date('Y-m-d H:i:s');
+                $startDate = $now->subDays(Carbon::DAYS_PER_WEEK);
+                $endDate = $now;
                 break;
             default:
                 $periodSet = false;
                 break;
         }
 
-        // get teams with events
         $teams = Team::has('results', '>=', 5)
             ->whereHas('results.event', function ($w) use ($startDate, $endDate, $periodSet) {
                 $w->where('status', 1);
@@ -317,17 +320,21 @@ class StatsController extends Controller
         }
 
         foreach ($teams as $team) {
-            $stats = [
+            $stats = (object) [
                 'name' => $team->name,
-                'totalgames' => 0,
-                'totalscore' => 0,
-                'avgscore' => 0,
-                'crawlscore' => 0,
-                'avgcrawlscore' => 0,
+                'totalgames' => $team->results->count(),
+                'totalscore' => $team->results->sum('score'),
+                'avgscore' => number_format($team->results->average('score'), 2),
+                'crawlscore' => $team->results->sum('crawl_score'),
+                'avgcrawlscore' => number_format($team->results->average('crawl_score'), 2),
                 'won' => 0,
                 'lost' => 0,
                 'winlose' => 0,
             ];
+
+            if (!$periodSet && $stats->totalgames < 6) {
+                continue;
+            }
 
             foreach ($team->results as $result) {
 
@@ -337,88 +344,59 @@ class StatsController extends Controller
 
                 $otherResult = $result->event->results->firstWhere('team_id', '!=', $result->team_id);
 
-                $stats['totalgames']++;
-                $stats['totalscore'] += $result->score;
-                $stats['crawlscore'] += $result->crawl_score;
-
-                // check if won or lost
                 if ($result->score > $otherResult->score) {
-                    $stats['won']++;
-                    $stats['winlose']++;
+                    $stats->won++;
+                    $stats->winlose++;
                 } else {
-                    $stats['lost']++;
+                    $stats->lost++;
                 }
 
             }
 
-            // set average
-            if ($stats['totalscore'] !== 0 && $stats['totalgames'] !== 0) {
-                $stats['avgscore'] = $stats['totalscore'] / $stats['totalgames'];
-            }
-            if ($stats['crawlscore'] !== 0 && $stats['totalgames'] !== 0) {
-                $stats['avgcrawlscore'] = $stats['crawlscore'] / $stats['totalgames'];
+            if ($stats->won !== 0 && $stats->lost !== 0) {
+                $stats->winlose = round($stats->won / $stats->lost, 2);
             }
 
-            // set win/lose ratio
-            if ($stats['won'] !== 0 && $stats['lost'] !== 0) {
-                $stats['winlose'] = $stats['won'] / $stats['lost'];
-            }
-
-            if ($stats['totalgames'] < 6) {
-                continue;
-            }
-
-            $stats['avgscore'] = round($stats['avgscore'], 2);
-            $stats['avgcrawlscore'] = round($stats['avgcrawlscore'], 2);
-            $stats['winlose'] = round($stats['winlose'], 2);
-
-            $data[] = $stats;
+            $data->push($stats);
         }
 
         switch ($sort) {
             case 'winlose':
-                usort($data, function ($a, $b) {
-                    return $a['winlose'] < $b['winlose'];
-                });
+                $data = $data->sortByDesc('winlose');
                 break;
             case 'win':
-                usort($data, function ($a, $b) {
-                    return $a['won'] < $b['won'];
-                });
+                $data = $data->sortByDesc('won');
                 break;
             case 'lose':
-                usort($data, function ($a, $b) {
-                    return $a['lost'] < $b['lost'];
-                });
+                $data = $data->sortByDesc('lost');
                 break;
             case 'avgscore':
-                usort($data, function ($a, $b) {
-                    return $a['avgscore'] < $b['avgscore'];
-                });
+                $data = $data->sortByDesc('avgscore');
                 break;
             case 'score':
-                usort($data, function ($a, $b) {
-                    return $a['totalscore'] < $b['totalscore'];
-                });
+                $data = $data->sortByDesc('totalscore');
                 break;
             case 'avgcrawl':
-                usort($data, function ($a, $b) {
-                    return $a['avgcrawlscore'] < $b['avgcrawlscore'];
-                });
+                $data = $data->sortByDesc('avgcrawlscore');
                 break;
             case 'crawl':
-                usort($data, function ($a, $b) {
-                    return $a['crawlscore'] < $b['crawlscore'];
-                });
+                $data = $data->sortByDesc('crawlscore');
                 break;
             case 'totalgames':
-                usort($data, function ($a, $b) {
-                    return $a['totalgames'] < $b['totalgames'];
-                });
+                $data = $data->sortByDesc('totalgames');
                 break;
         }
 
-        return new JsonResponse($data);
-    }
+        // Laravel doesn't return an array when using $data->toArray for some reason.
+        // We're wrapping the data into a ordinary array to prevent having to use Object.keys on the client side
+        $response = [];
 
+        $data->each(function ($statsData) use (&$response) {
+            $response[] = $statsData;
+        });
+
+        return new JsonResponse([
+            'data' => $response,
+        ]);
+    }
 }
