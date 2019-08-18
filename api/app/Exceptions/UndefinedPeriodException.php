@@ -7,7 +7,7 @@ use Exception;
 class UndefinedPeriodException extends Exception
 {
     /**
-     * Instantiate a new UnefinedPeriodException
+     * Create a new UndefinedPeriodException instance
      *
      * @param string $period
      *

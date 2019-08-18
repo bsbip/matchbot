@@ -17,3 +17,18 @@ export interface DuoStats {
     winlose: number;
     won: number;
 }
+
+export interface PlayerStats {
+    id: number;
+    won: number;
+    lost: number;
+    draw: number;
+    name: string;
+    points: number;
+    user_id: string;
+    matches: number;
+    score: number;
+    crawl_score: number;
+    score_avg: number;
+    crawl_score_avg: number;
+}
