@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpService } from 'src/app/services/http.service';
+import { ApiResponse } from 'src/app/types/api-response';
 
 @Component({
     selector: 'app-match',
@@ -9,7 +10,7 @@ import { HttpService } from 'src/app/services/http.service';
 export class MatchComponent implements OnInit {
     public loading = false;
     public selectedMatchType = 'random';
-    public resResult: ApiResponse = {};
+    public resResult: ApiResponse<void> = {};
     public users: any;
     public matchTypes: { name: string; code_name: string }[];
     public matchPlayers: {}[];

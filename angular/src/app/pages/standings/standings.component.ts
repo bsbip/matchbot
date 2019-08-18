@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpService } from 'src/app/services/http.service';
+import { DuoStats, ApiResponse } from 'src/app/types/api-response';
 
 @Component({
     selector: 'app-standings',
@@ -7,9 +8,7 @@ import { HttpService } from 'src/app/services/http.service';
     styleUrls: ['./standings.component.scss'],
 })
 export class StandingsComponent implements OnInit {
-    public totals = [];
-    public playerStats = [];
-    public data: any;
+    public data: DuoStats[] = [];
 
     public periodFilter = 'all-time';
     public periods = [
@@ -89,7 +88,7 @@ export class StandingsComponent implements OnInit {
         },
     ];
 
-    public resResult: ApiResponse = {};
+    public resResult: ApiResponse<void> = {};
 
     constructor(private httpService: HttpService) {}
 
@@ -107,20 +106,14 @@ export class StandingsComponent implements OnInit {
      * @param newSort the new sort option
      */
     public getDuoStats(newPeriod: string, newSort: string): void {
-        // reset
-        this.totals = [];
-        // make request
         this.periodFilter = newPeriod;
         this.sortFilter = newSort;
         this.httpService
             .get(`standings/duo/${this.periodFilter}/${this.sortFilter}`)
             .subscribe(
-                (data: ApiResponse) => {
+                (data: ApiResponse<DuoStats>) => {
                     if (data.msg === undefined) {
-                        this.data = data;
-                        for (const stat of this.data) {
-                            this.totals.push(stat);
-                        }
+                        this.data = data.data;
                     } else {
                         this.resResult.error = true;
                         this.resResult.msg = data.msg;
@@ -128,7 +121,7 @@ export class StandingsComponent implements OnInit {
                 },
                 error => console.error(error),
                 () => {
-                    if (this.totals.length > 0) {
+                    if (this.data.length > 0) {
                         this.resResult = {};
                     }
                 }

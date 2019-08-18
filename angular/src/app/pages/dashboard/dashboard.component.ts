@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpService } from 'src/app/services/http.service';
+import { ApiResponse } from 'src/app/types/api-response';
 
 @Component({
     selector: 'app-dashboard',
@@ -13,7 +14,7 @@ export class DashboardComponent implements OnInit {
     public loading = false;
     public amountOfResults = 0;
     public events = [];
-    public resResult: ApiResponse = {};
+    public resResult: ApiResponse<void> = {};
 
     constructor(private httpService: HttpService) {}
 

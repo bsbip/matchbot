@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpService } from 'src/app/services/http.service';
+import { ApiResponse } from 'src/app/types/api-response';
 
 @Component({
     selector: 'app-players',
@@ -8,7 +9,7 @@ import { HttpService } from 'src/app/services/http.service';
 })
 export class PlayersComponent implements OnInit {
     public loading = false;
-    public resResult: ApiResponse = {};
+    public resResult: ApiResponse<void> = {};
     public users: any;
     public player: any;
 
