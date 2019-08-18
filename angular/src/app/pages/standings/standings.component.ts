@@ -54,12 +54,12 @@ export class StandingsComponent implements OnInit {
         {
             id: 1,
             name: 'Gewonnen',
-            code: 'win',
+            code: 'won',
         },
         {
             id: 2,
             name: 'Verloren',
-            code: 'lose',
+            code: 'lost',
         },
         {
             id: 3,
@@ -74,17 +74,17 @@ export class StandingsComponent implements OnInit {
         {
             id: 5,
             name: 'Teamscore',
-            code: 'score',
+            code: 'totalscore',
         },
         {
             id: 6,
             name: 'Gemiddelde kruipscore',
-            code: 'avgcrawl',
+            code: 'avgcrawlscore',
         },
         {
             id: 7,
             name: 'Kruipscore',
-            code: 'crawl',
+            code: 'crawlscore',
         },
     ];
 

@@ -147,8 +147,8 @@ class StatsController extends Controller
             $playerStats->user_id = $player->user_id;
             $playerStats->name = $player->name;
             $playerStats->id = $player->id;
-            $playerStats->score_avg = number_format($player->results->average('score'), 2);
-            $playerStats->crawl_score_avg = number_format($player->results->average('crawl_score'), 2);
+            $playerStats->score_avg = round($player->results->average('score'), 2);
+            $playerStats->crawl_score_avg = round($player->results->average('crawl_score'), 2);
             $playerStats->won = 0;
             $playerStats->lost = 0;
             $playerStats->draw = 0;
@@ -263,7 +263,18 @@ class StatsController extends Controller
         $endDate = null;
         $startDate = null;
         $now = Carbon::now();
-        $data = new Collection();
+        $data = new Collection([]);
+
+        $sortOptions = [
+            'won',
+            'lost',
+            'crawlscore',
+            'winlose',
+            'avgscore',
+            'totalgames',
+            'totalscore',
+            'avgcrawlscore',
+        ];
 
         switch ($period) {
             case 'current-month':
@@ -321,15 +332,15 @@ class StatsController extends Controller
 
         foreach ($teams as $team) {
             $stats = (object) [
-                'name' => $team->name,
-                'totalgames' => $team->results->count(),
-                'totalscore' => $team->results->sum('score'),
-                'avgscore' => number_format($team->results->average('score'), 2),
-                'crawlscore' => $team->results->sum('crawl_score'),
-                'avgcrawlscore' => number_format($team->results->average('crawl_score'), 2),
                 'won' => 0,
                 'lost' => 0,
                 'winlose' => 0,
+                'name' => $team->name,
+                'totalgames' => $team->results->count(),
+                'totalscore' => $team->results->sum('score'),
+                'crawlscore' => $team->results->sum('crawl_score'),
+                'avgscore' => round($team->results->average('score'), 2),
+                'avgcrawlscore' => round($team->results->average('crawl_score'), 2),
             ];
 
             if (!$periodSet && $stats->totalgames < 6) {
@@ -360,43 +371,12 @@ class StatsController extends Controller
             $data->push($stats);
         }
 
-        switch ($sort) {
-            case 'winlose':
-                $data = $data->sortByDesc('winlose');
-                break;
-            case 'win':
-                $data = $data->sortByDesc('won');
-                break;
-            case 'lose':
-                $data = $data->sortByDesc('lost');
-                break;
-            case 'avgscore':
-                $data = $data->sortByDesc('avgscore');
-                break;
-            case 'score':
-                $data = $data->sortByDesc('totalscore');
-                break;
-            case 'avgcrawl':
-                $data = $data->sortByDesc('avgcrawlscore');
-                break;
-            case 'crawl':
-                $data = $data->sortByDesc('crawlscore');
-                break;
-            case 'totalgames':
-                $data = $data->sortByDesc('totalgames');
-                break;
+        if (in_array($sort, $sortOptions)) {
+            $data = $data->sortByDesc($sort)->values();
         }
 
-        // Laravel doesn't return an array when using $data->toArray for some reason.
-        // We're wrapping the data into a ordinary array to prevent having to use Object.keys on the client side
-        $response = [];
-
-        $data->each(function ($statsData) use (&$response) {
-            $response[] = $statsData;
-        });
-
         return new JsonResponse([
-            'data' => $response,
+            'data' => $data->toArray(),
         ]);
     }
 }
