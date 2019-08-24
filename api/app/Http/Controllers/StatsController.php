@@ -146,11 +146,7 @@ class StatsController extends Controller
             return new JsonResponse($data);
         }
 
-        if ($orderDirection === 'asc') {
-            $data = $data->sortBy($orderBy);
-        } else {
-            $data = $data->sortByDesc($orderBy);
-        }
+        $data = $data->sortBy($orderBy, $orderDirection);
 
         return new JsonResponse([
             'data' => $data->values()->toArray(),

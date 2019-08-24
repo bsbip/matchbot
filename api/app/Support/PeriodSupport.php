@@ -29,7 +29,7 @@ class PeriodSupport
             return self::$period();
         }
 
-        throw (new UndefinedPeriodException($period));
+        throw new UndefinedPeriodException($period);
     }
 
     /**
