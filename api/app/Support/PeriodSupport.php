@@ -3,9 +3,9 @@
 namespace App\Support;
 
 use App\Exceptions\UndefinedPeriodException;
+use App\Support\Classes\Period;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
-use stdClass;
 
 class PeriodSupport
 {
@@ -14,14 +14,14 @@ class PeriodSupport
      *
      * @param string $period
      *
-     * @return stdClass
+     * @return Period
      *
      * @throws UndefinedPeriodException
      *
      * @author Roy Freij <roy@bsbip.com>
      * @version 1.0.0
      */
-    public static function retrieve(string $period): stdClass
+    public static function retrieve(string $period): Period
     {
         $period = Str::camel($period);
 
@@ -35,96 +35,96 @@ class PeriodSupport
     /**
      * Retrieve period for current month
      *
-     * @return stdClass
+     * @return Period
      *
      * @author Roy Freij <roy@bsbip.com>
      * @version 1.0.0
      */
-    public static function currentMonth(): stdClass
+    public static function currentMonth(): Period
     {
-        return (object) [
-            'from' => Carbon::now()->startOfMonth(),
-            'to' => Carbon::now()->endOfMonth(),
-        ];
+        return new Period(
+            Carbon::now()->startOfMonth(),
+            Carbon::now()->endOfMonth()
+        );
     }
 
     /**
      * Retrieve period for current week
      *
-     * @return stdClass
+     * @return Period
      *
      * @author Roy Freij <roy@bsbip.com>
      * @version 1.0.0
      */
-    public static function currentWeek(): stdClass
+    public static function currentWeek(): Period
     {
-        return (object) [
-            'from' => Carbon::now()->startOfWeek(),
-            'to' => Carbon::now()->endOfWeek(),
-        ];
+        return new Period(
+            Carbon::now()->startOfWeek(),
+            Carbon::now()->endOfWeek()
+        );
     }
 
     /**
      * Retrieve period for today
      *
-     * @return stdClass
+     * @return Period
      *
      * @author Roy Freij <roy@bsbip.com>
      * @version 1.0.0
      */
-    public static function today(): stdClass
+    public static function today(): Period
     {
-        return (object) [
-            'from' => Carbon::now()->startOfDay(),
-            'to' => Carbon::now()->endOfDay(),
-        ];
+        return new Period(
+            Carbon::now()->startOfDay(),
+            Carbon::now()->endOfDay()
+        );
     }
 
     /**
      * Retrieve period for yesterday
      *
-     * @return stdClass
+     * @return Period
      *
      * @author Roy Freij <roy@bsbip.com>
      * @version 1.0.0
      */
-    public static function yesterday(): stdClass
+    public static function yesterday(): Period
     {
-        return (object) [
-            'from' => Carbon::now()->yesterday()->startOfDay(),
-            'to' => Carbon::now()->yesterday()->endOfDay(),
-        ];
+        return new Period(
+            Carbon::now()->yesterday()->startOfDay(),
+            Carbon::now()->yesterday()->endOfDay()
+        );
     }
 
     /**
      * Retrieve period for the last seven days
      *
-     * @return stdClass
+     * @return Period
      *
      * @author Roy Freij <roy@bsbip.com>
      * @version 1.0.0
      */
-    public static function lastSevenDays(): stdClass
+    public static function lastSevenDays(): Period
     {
-        return (object) [
-            'from' => Carbon::now()->subDays(Carbon::DAYS_PER_WEEK),
-            'to' => Carbon::now(),
-        ];
+        return new Period(
+            Carbon::now()->subDays(Carbon::DAYS_PER_WEEK),
+            Carbon::now()
+        );
     }
 
     /**
      * Retrieve period for the last thirty days
      *
-     * @return StdClass
+     * @return Period
      *
      * @author Roy Freij <roy@bsbip.com>
      * @version 1.0.0
      */
-    public static function lastThirtyDays(): StdClass
+    public static function lastThirtyDays(): Period
     {
-        return (object) [
-            'from' => Carbon::now()->subDays(30),
-            'to' => Carbon::now(),
-        ];
+        return new Period(
+            Carbon::now()->subDays(30),
+            Carbon::now()
+        );
     }
 }
