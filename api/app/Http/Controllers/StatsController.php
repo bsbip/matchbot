@@ -146,7 +146,7 @@ class StatsController extends Controller
             return new JsonResponse($data);
         }
 
-        $data = $data->sortBy($orderBy, $orderDirection);
+        $data = $data->sortBy($orderBy, SORT_REGULAR, $orderDirection === 'desc');
 
         return new JsonResponse([
             'data' => $data->values()->toArray(),
