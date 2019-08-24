@@ -30,7 +30,7 @@ export class StandingsComponent implements OnInit {
         {
             id: 3,
             name: '7 dagen',
-            code: '7-days',
+            code: 'last-seven-days',
         },
         {
             id: 4,
@@ -106,6 +106,7 @@ export class StandingsComponent implements OnInit {
      * @param newSort the new sort option
      */
     public getDuoStats(newPeriod: string, newSort: string): void {
+        this.data = [];
         this.periodFilter = newPeriod;
         this.sortFilter = newSort;
         this.httpService

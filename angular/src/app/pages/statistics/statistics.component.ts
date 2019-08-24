@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpService } from 'src/app/services/http.service';
-import { ApiResponse } from 'src/app/types/api-response';
+import { ApiResponse, PlayerStats } from 'src/app/types/api-response';
 
 @Component({
     selector: 'app-statistics',
@@ -31,12 +31,12 @@ export class StatisticsComponent implements OnInit {
         {
             id: 3,
             name: '7 dagen',
-            code: '7-days',
+            code: 'last-seven-days',
         },
         {
             id: 4,
             name: '30 dagen',
-            code: '30-days',
+            code: 'last-thirty-days',
         },
         {
             id: 5,
@@ -185,7 +185,6 @@ export class StatisticsComponent implements OnInit {
      */
     public ngOnInit(): void {
         this.getTotals('all-time');
-        this.getPlayerStats();
     }
 
     /**
@@ -205,9 +204,9 @@ export class StatisticsComponent implements OnInit {
                 }`
             )
             .subscribe(
-                data => {
+                (data: ApiResponse<PlayerStats>) => {
                     this.totals = [];
-                    this.data = data;
+                    this.data = data.data;
                     for (const stat of this.data) {
                         this.totals.push(stat);
                     }
@@ -234,41 +233,5 @@ export class StatisticsComponent implements OnInit {
     public changeOrder(newOrder: string): void {
         this.orderBy = this.orderOptions[newOrder];
         this.getTotals(this.periodFilter);
-    }
-
-    /**
-     * Get the player statistics.
-     *
-     * @author Ramon Bakker
-     */
-    private getPlayerStats(): void {
-        this.httpService.get(`stats/players/${this.statsLimit}`).subscribe(
-            data => {
-                this.playerStats = [];
-                this.data = data;
-                for (const stat of this.data['results']) {
-                    this.playerStats.push(stat);
-                }
-
-                for (const playerStat of this.playerStats) {
-                    const playerScores = [];
-                    const playerCrawlScores = [];
-
-                    for (const result of playerStat.data) {
-                        playerScores.push(result.score);
-                        playerCrawlScores.push(result.crawl_score);
-                    }
-                }
-            },
-            error => console.error(error),
-            () => {
-                if (this.totals.length === 0) {
-                    this.resResult.error = true;
-                    this.resResult.msg = 'Geen statistieken beschikbaar.';
-                } else {
-                    this.resResult = {};
-                }
-            }
-        );
     }
 }

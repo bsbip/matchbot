@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Player;
 use App\Result;
+use App\Support\PeriodSupport;
 use App\Team;
-use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -81,7 +81,7 @@ class StatsController extends Controller
      */
     public function getTotalStats(string $period = '', string $orderBy = 'id', string $orderDirection = 'asc'): JsonResponse
     {
-        $data = [];
+        $data = new Collection();
         $periodSet = $period !== '' && $period !== 'all-time';
 
         if ($orderBy == 'player') {
@@ -91,67 +91,40 @@ class StatsController extends Controller
         $players = Player::when($orderBy == 'id' || $orderBy == 'name', function ($query) use ($orderBy, $orderDirection) {
             $query->orderBy($orderBy, $orderDirection);
         })
-            ->with(['results' => function ($query) use ($periodSet, $period) {
+            ->whereHas('results', function ($query) use ($periodSet, $period) {
                 $query
                     ->where('results.deleted', false)
-                    ->with(['event.results'])
                     ->when($periodSet, function ($query) use ($period) {
-                        switch ($period) {
-                            case 'today':
-                                $period = date('Y-m-d 00:00:00');
-                                $periodEnd = date('Y-m-d H:i:s');
-                                break;
-                            case 'yesterday':
-                                $period = new \DateTime();
-                                $period->sub(new \DateInterval('P1D'));
-                                $period = $period->format('Y-m-d 00:00:00');
-                                $periodEnd = date('Y-m-d 00:00:00');
-                                break;
-                            case 'current-week':
-                                $period = date('Y-m-d 00:00:00', strtotime('-' . date('w') . ' days'));
-                                $periodEnd = date('Y-m-d H:i:s');
-                                break;
-                            case '7-days':
-                                $period = new \DateTime();
-                                $period = $period->sub(new \DateInterval('P7D'))->format('Y-m-d 00:00:00');
-                                $periodEnd = date('Y-m-d H:i:s');
-                                break;
-                            case '30-days':
-                                $period = new \DateTime();
-                                $period = $period->sub(new \DateInterval('P30D'))->format('Y-m-d 00:00:00');
-                                $periodEnd = date('Y-m-d H:i:s');
-                                break;
-                            case 'current-month':
-                                $period = date('Y-m-01 00:00:00');
-                                $periodEnd = date('Y-m-d H:i:s');
-                                break;
-                            default:
-                                return;
-                        }
+                        $period = PeriodSupport::retrieve($period);
 
                         $query->whereBetween('results.created_at', [
-                            $period,
-                            $periodEnd,
+                            $period->from,
+                            $period->to,
                         ]);
                     });
-            }])
+            })
+            ->with(['results.event.results'])
             ->get();
 
         foreach ($players as $player) {
+            $playerStats = (object) [
+                'id' => $player->id,
+                'won' => 0,
+                'lost' => 0,
+                'draw' => 0,
+                'name' => $player->name,
+                'points' => $player->points,
+                'user_id' => $player->user_id,
+                'matches' => $player->results->count(),
+                'score' => $player->results->sum('score'),
+                'crawl_score' => $player->results->sum('crawl_score'),
+                'score_avg' => round($player->results->average('score'), 2),
+                'crawl_score_avg' => round($player->results->average('crawl_score'), 2),
+            ];
 
-            $playerStats = new \stdClass();
-
-            $playerStats->score = $player->results->sum('score');
-            $playerStats->matches = $player->results->count() ?: 1;
-            $playerStats->crawl_score = $player->results->sum('crawl_score');
-            $playerStats->user_id = $player->user_id;
-            $playerStats->name = $player->name;
-            $playerStats->id = $player->id;
-            $playerStats->score_avg = round($player->results->average('score'), 2);
-            $playerStats->crawl_score_avg = round($player->results->average('crawl_score'), 2);
-            $playerStats->won = 0;
-            $playerStats->lost = 0;
-            $playerStats->draw = 0;
+            if (!$periodSet && $playerStats->matches <= 5) {
+                continue;
+            }
 
             foreach ($player->results as $stat) {
 
@@ -166,29 +139,18 @@ class StatsController extends Controller
                 }
             }
 
-            if (sizeof(get_object_vars($playerStats)) > 0) {
-                $playerStats->points = $player->points;
-                $data[] = $playerStats;
-            }
+            $data->push($playerStats);
         }
 
         if ($orderBy === 'id' || $orderBy === 'name') {
             return new JsonResponse($data);
         }
 
-        usort($data, function ($a, $b) use ($orderBy, $orderDirection) {
-            if ($a->$orderBy === $b->$orderBy) {
-                return 0;
-            }
+        $data = $data->sortBy($orderBy, SORT_REGULAR, $orderDirection === 'desc');
 
-            if ($orderDirection === 'asc') {
-                return ($a->$orderBy < $b->$orderBy) ? -1 : 1;
-            } else {
-                return ($a->$orderBy < $b->$orderBy) ? 1 : -1;
-            }
-        });
-
-        return new JsonResponse($data);
+        return new JsonResponse([
+            'data' => $data->values()->toArray(),
+        ]);
     }
 
     /**
@@ -260,9 +222,7 @@ class StatsController extends Controller
      */
     public function getDuoStats(string $period = '', string $sort = 'winlose'): JsonResponse
     {
-        $endDate = null;
-        $startDate = null;
-        $now = Carbon::now();
+        $periodSet = $period !== '' && $period !== 'all-time';
         $data = new Collection([]);
 
         $sortOptions = [
@@ -276,49 +236,22 @@ class StatsController extends Controller
             'avgcrawlscore',
         ];
 
-        switch ($period) {
-            case 'current-month':
-                $periodSet = true;
-                $startDate = $now->startOfMonth();
-                $endDate = $now->endOfMonth();
-                break;
-            case 'current-week':
-                $periodSet = true;
-                $startDate = $now->startOfWeek();
-                $endDate = $now->endOfWeek();
-                break;
-            case 'today':
-                $periodSet = true;
-                $startDate = $now->startOfDay();
-                $endDate = $now->endOfDay();
-                break;
-            case 'yesterday':
-                $periodSet = true;
-                $startDate = $now->yesterday()->startOfDay();
-                $endDate = $now->yesterday()->endOfDay();
-                break;
-            case '7-days':
-                $periodSet = true;
-                $startDate = $now->subDays(Carbon::DAYS_PER_WEEK);
-                $endDate = $now;
-                break;
-            default:
-                $periodSet = false;
-                break;
+        if ($periodSet) {
+            $period = PeriodSupport::retrieve($period);
         }
 
         $teams = Team::has('results', '>=', 5)
-            ->whereHas('results.event', function ($w) use ($startDate, $endDate, $periodSet) {
+            ->whereHas('results.event', function ($w) use ($period, $periodSet) {
                 $w->where('status', 1);
-                $w->when($periodSet, function ($w2) use ($startDate, $endDate) {
-                    $w2->whereBetween('created_at', [$startDate, $endDate]);
+                $w->when($periodSet, function ($w2) use ($period) {
+                    $w2->whereBetween('created_at', [$period->from, $period->to]);
                 });
                 $w->has('results');
             })
-            ->with(['results.event' => function ($w) use ($startDate, $endDate, $periodSet) {
+            ->with(['results.event' => function ($w) use ($period, $periodSet) {
                 $w->where('status', 1);
-                $w->when($periodSet, function ($w2) use ($startDate, $endDate) {
-                    $w2->whereBetween('created_at', [$startDate, $endDate]);
+                $w->when($periodSet, function ($w2) use ($period) {
+                    $w2->whereBetween('created_at', [$period->from, $period->to]);
                 });
                 $w->with(['results']);
             }])
@@ -361,7 +294,6 @@ class StatsController extends Controller
                 } else {
                     $stats->lost++;
                 }
-
             }
 
             if ($stats->won !== 0 && $stats->lost !== 0) {
@@ -375,10 +307,8 @@ class StatsController extends Controller
             $data = $data->sortByDesc($sort);
         }
 
-        $data = $data->values();
-
         return new JsonResponse([
-            'data' => $data->toArray(),
+            'data' => $data->values()->toArray(),
         ]);
     }
 }
