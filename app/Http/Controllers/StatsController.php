@@ -9,6 +9,8 @@ use App\Team;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Inertia\Inertia;
+use Inertia\Response as InertiaResponse;
 
 /**
  * Actions for statistics
@@ -79,8 +81,12 @@ class StatsController extends Controller
      *
      * @author Ramon Bakker <ramonbakker@rambit.nl>
      */
-    public function getTotalStats(string $period = '', string $orderBy = 'id', string $orderDirection = 'asc'): JsonResponse
+    public function getTotalStats(Request $request, string $period = '', string $orderBy = 'id', string $orderDirection = 'asc'): InertiaResponse
     {
+        $period = $request->query('period', '');
+        $orderBy = $request->query('orderBy', 'id');
+        $orderDirection = $request->query('orderDirection', 'asc');
+
         $data = new Collection();
         $periodSet = $period !== '' && $period !== 'all-time';
 
@@ -143,12 +149,14 @@ class StatsController extends Controller
         }
 
         if ($orderBy === 'id' || $orderBy === 'name') {
-            return new JsonResponse($data);
+            return Inertia::render('Statistics', [
+                'data' => $data->values()->toArray(),
+            ]);
         }
 
         $data = $data->sortBy($orderBy, SORT_REGULAR, $orderDirection === 'desc');
 
-        return new JsonResponse([
+        return Inertia::render('Statistics', [
             'data' => $data->values()->toArray(),
         ]);
     }

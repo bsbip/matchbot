@@ -19,14 +19,4 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/stats', function () {
-    return Inertia::render('Statistics', [
-        'msg' => 'hello world',
-    ]);
-});
-
-Route::get('/stats', function () {
-    return Inertia::render('Statistics', [
-        'msg' => 'hello world',
-    ]);
-});
+Route::get('/stats', 'StatsController@getTotalStats');

@@ -1,19 +1,22 @@
 <template>
     <main>
-        <header>
-            <inertia-link href="/players">Spelers</inertia-link>
-            <inertia-link href="/match">Match aanmaken</inertia-link>
-            <inertia-link href="/results">Resultaten toevoegen</inertia-link>
+        <header
+            id="header"
+            class="fixed w-full z-10 top-0 bg-white border-b border-gray-400"
+        >
+            <Navigation />
         </header>
 
-        <section>
+        <section
+            class="container w-full flex flex-col flex-wrap mx-auto px-2 pt-8 lg:pt-16 mt-16"
+        >
             <slot />
         </section>
     </main>
 </template>
 
 <script>
-import InertiaLink from '@inertiajs/inertia-vue/src/link';
+import Navigation from '@shared/Navigation';
 
 export default {
     name: 'HelloWorld',
@@ -21,7 +24,7 @@ export default {
         msg: String,
     },
     components: {
-        InertiaLink,
+        Navigation,
     },
 };
 </script>

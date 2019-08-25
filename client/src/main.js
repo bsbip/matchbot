@@ -1,6 +1,9 @@
 import { InertiaApp } from '@inertiajs/inertia-vue';
 
 import Vue from 'vue';
+
+import '../main.css';
+
 const app = document.getElementById('app');
 
 Vue.config.productionTip = true;
