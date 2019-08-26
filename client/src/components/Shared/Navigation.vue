@@ -10,6 +10,7 @@
             <inertia-link
                 href="/"
                 class="text-gray-900 text-base no-underline hover:no-underline font-extrabold text-xl"
+                v-bind:class="{ active: url === '/' }"
                 >Matchbot</inertia-link
             >
         </div>
@@ -31,14 +32,17 @@
         </div>
         <div
             class="w-full flex-grow lg:flex lg:content-center lg:items-center lg:w-auto lg:block mt-2 lg:mt-0 z-20"
-            :class="{ hidden: navbarHidden }"
+            v-bind:class="{ hidden: navbarHidden }"
             id="nav-content"
         >
             <ul class="list-reset lg:flex justify-end items-center">
                 <li class="mr-3 py-2 lg:py-0">
                     <inertia-link
                         href="/players"
-                        class="inline-block py-2 px-4 text-gray-900 font-bold no-underline"
+                        class="inline-block py-2 px-4 text-gray-900 no-underline"
+                        v-bind:class="{
+                            active: url === '/players',
+                        }"
                         >Spelers</inertia-link
                     >
                 </li>
@@ -46,6 +50,9 @@
                     <inertia-link
                         href="/match"
                         class="inline-block text-gray-600 no-underline hover:text-gray-900 hover:underline py-2 px-4"
+                        v-bind:class="{
+                            active: url === '/match',
+                        }"
                         >Match aanmaken</inertia-link
                     >
                 </li>
@@ -53,6 +60,9 @@
                     <inertia-link
                         href="/results"
                         class="inline-block text-gray-600 no-underline hover:text-gray-900 hover:underline py-2 px-4"
+                        v-bind:class="{
+                            active: url === '/results',
+                        }"
                         >Resultaten toevoegen</inertia-link
                     >
                 </li>
@@ -60,6 +70,9 @@
                     <inertia-link
                         href="/stats"
                         class="inline-block text-gray-600 no-underline hover:text-gray-900 hover:underline py-2 px-4"
+                        v-bind:class="{
+                            active: url === '/stats',
+                        }"
                         >Statistieken</inertia-link
                     >
                 </li>
@@ -67,6 +80,9 @@
                     <inertia-link
                         href="/standings"
                         class="inline-block text-gray-600 no-underline hover:text-gray-900 hover:underline py-2 px-4"
+                        v-bind:class="{
+                            active: url === '/standings',
+                        }"
                         >Standen</inertia-link
                     >
                 </li>
@@ -77,11 +93,14 @@
 
 <script>
 import InertiaLink from '@inertiajs/inertia-vue/src/link';
+import Inertia from '@inertiajs/inertia';
 
 export default {
     data: function() {
         return {
             navbarHidden: true,
+            Inertia: Inertia,
+            url: window.location.pathname,
         };
     },
     methods: {
@@ -91,6 +110,9 @@ export default {
     },
     components: {
         InertiaLink,
+    },
+    mounted: function() {
+        console.log(this.url);
     },
 };
 </script>

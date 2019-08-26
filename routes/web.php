@@ -1,7 +1,5 @@
 <?php
 
-use Inertia\Inertia;
-
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -13,10 +11,7 @@ use Inertia\Inertia;
 |
  */
 
-Route::get('/', function () {
-    return Inertia::render('Standings', [
-        'msg' => 'hello world',
-    ]);
-});
+Route::get('/', 'MatchController@getEventResults');
 
 Route::get('/stats', 'StatsController@getTotalStats');
+Route::get('/standings', 'StatsController@getDuoStats');

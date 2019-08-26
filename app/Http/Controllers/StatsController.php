@@ -228,8 +228,11 @@ class StatsController extends Controller
      *
      * @author Sander van Ooijen
      */
-    public function getDuoStats(string $period = '', string $sort = 'winlose'): JsonResponse
+    public function getDuoStats(Request $request, string $period = '', string $sort = 'winlose'): InertiaResponse
     {
+        $period = $request->query('period', '');
+        $sort = $request->query('orderBy', 'winlose');
+
         $periodSet = $period !== '' && $period !== 'all-time';
         $data = new Collection([]);
 
@@ -264,12 +267,6 @@ class StatsController extends Controller
                 $w->with(['results']);
             }])
             ->get();
-
-        if (sizeof($teams) === 0) {
-            return new JsonResponse([
-                'msg' => 'Geen teams gevonden',
-            ]);
-        }
 
         foreach ($teams as $team) {
             $stats = (object) [
@@ -315,8 +312,8 @@ class StatsController extends Controller
             $data = $data->sortByDesc($sort);
         }
 
-        return new JsonResponse([
-            'data' => $data->values()->toArray(),
+        return Inertia::render('Standings', [
+            'data' => $data->values(),
         ]);
     }
 }

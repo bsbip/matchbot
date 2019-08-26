@@ -1,4 +1,8 @@
 @tailwind base;
 @tailwind components;
 
+.active {
+    @apply font-bold;
+}
+
 @tailwind utilities;

@@ -2,12 +2,13 @@
 
 namespace App;
 
-use App\Result;
-use App\EventTeam;
 use App\EventPlayer;
+use App\EventTeam;
+use App\Result;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Event extends Model
 {
@@ -21,6 +22,11 @@ class Event extends Model
     public function eventTeams(): HasMany
     {
         return $this->hasMany(EventTeam::class, 'event_id', 'id');
+    }
+
+    public function teams(): HasManyThrough
+    {
+        return $this->hasManyThrough(Team::class, EventTeam::class, 'event_id', 'id', 'id', 'team_id');
     }
 
     /**

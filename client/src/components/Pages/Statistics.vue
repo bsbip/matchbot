@@ -64,18 +64,12 @@
             >
                 <thead>
                     <tr>
-                        <th
-                            class="py-2 px-3 bg-gray-200 font-bold uppercase text-xs text-gray-dark border-b border-gray-300"
-                        >
-                            Nr.
-                        </th>
-                        <th
+                        <TableHeader field="Nr." />
+                        <TableHeader
                             v-for="field in fields"
                             v-bind:key="field.text"
-                            class="py-4 px-6 bg-gray-200 font-bold uppercase text-xs text-gray-dark border-b border-gray-300"
-                        >
-                            {{ field.text }}
-                        </th>
+                            :field="field.text"
+                        />
                     </tr>
                 </thead>
                 <tbody>
@@ -84,16 +78,13 @@
                         v-for="(statistic, index) of data"
                         v-bind:key="statistic.id"
                     >
-                        <td class="py-4 px-6 border-b border-gray-300 text-sm">
-                            {{ index + 1 }}
-                        </td>
-                        <td
-                            class="py-4 px-6 border-b border-gray-300 text-sm"
+                        <TableColumn :value="index + 1" />
+                        <TableColumn
                             v-for="field in fields"
-                            v-bind:key="field.property"
-                        >
-                            {{ statistic[field.property] }}
-                        </td>
+                            v-bind:key="field.text"
+                            :field="field.property"
+                            :value="statistic[field.property]"
+                        />
                     </tr>
                 </tbody>
             </table>
@@ -110,12 +101,20 @@
 
 <script>
 import Layout from '@shared/Layout.vue';
+import TableHeader from '@shared/Table/TableHeader.vue';
+import TableColumn from '@shared/Table/TableColumn.vue';
+
 import statistics from '../../config/statistics';
 
 import { Inertia } from '@inertiajs/inertia';
 
 export default {
     name: 'Statistics',
+    components: {
+        Layout,
+        TableHeader,
+        TableColumn,
+    },
     props: {
         data: Array,
     },
@@ -140,9 +139,6 @@ export default {
                 },
             });
         },
-    },
-    components: {
-        Layout,
     },
     mounted: function() {
         this.selectedOrderOption = this.orderOptions[0];

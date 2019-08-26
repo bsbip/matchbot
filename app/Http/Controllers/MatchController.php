@@ -2,23 +2,25 @@
 
 namespace App\Http\Controllers;
 
-use DB;
 use App\Event;
-use Exception;
-use Validator;
-use App\Player;
-use App\Result;
 use App\EventTeam;
-use Carbon\Carbon;
+use App\Jobs\CalculatePoints;
 use App\Jobs\CreateMatch;
 use App\Jobs\InitiateMatch;
-use Illuminate\Http\Request;
-use App\Jobs\CalculatePoints;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Config;
+use App\Player;
+use App\Result;
+use Carbon\Carbon;
+use DB;
+use Exception;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
+use Inertia\Inertia;
+use Inertia\Response as InertiaResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Validator;
 
 /**
  * Actions for matches
@@ -327,31 +329,22 @@ class MatchController extends Controller
      *
      * @author Ramon Bakker <ramonbakker@rambit.nl>
      */
-    public function getEventResults(int $page = 0, int $limit = 0): JsonResponse
+    public function getEventResults(Request $request): InertiaResponse
     {
         $results = [];
 
         $results = Event::where('events.status', 1)
-            ->with(['eventTeams' => function ($q) {
-                $q->join('teams', 'teams.id', '=', 'event_teams.team_id')
-                    ->join('results', function ($j) {
-                        $j->on('event_teams.event_id', '=', 'results.event_id')
-                            ->on('results.team_id', '=', 'event_teams.team_id')
-                            ->where('deleted', false);
-                    });
+            ->with(['results' => function ($query) {
+                $query
+                    ->where('deleted', false)
+                    ->with('team');
             }])
             ->orderBy('events.end', 'desc')
-            ->when($limit > 0, function ($q) use ($page, $limit) {
-                return $q->skip($page * $limit)
-                    ->take($limit);
-            })
-            ->get();
+            ->paginate((int) $request->query('limit', 25));
 
-        if (sizeof($results) == 0) {
-            return new JsonResponse('Geen resultaten gevonden.', Response::HTTP_NOT_FOUND);
-        }
-
-        return new JsonResponse($results);
+        return Inertia::render('Standings', [
+            $results,
+        ]);
     }
 
     /**
