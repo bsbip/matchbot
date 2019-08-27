@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Event;
 use App\EventTeam;
+use App\Http\Resources\EventResourceCollection;
 use App\Jobs\CalculatePoints;
 use App\Jobs\CreateMatch;
 use App\Jobs\InitiateMatch;
@@ -342,9 +343,9 @@ class MatchController extends Controller
             ->orderBy('events.end', 'desc')
             ->paginate((int) $request->query('limit', 25));
 
-        return Inertia::render('Standings', [
-            $results,
-        ]);
+        return Inertia::render('Overview',
+            (new EventResourceCollection($results))->toArray($request)
+        );
     }
 
     /**

@@ -12,6 +12,17 @@
  */
 
 Route::get('/', 'MatchController@getEventResults');
-
 Route::get('/stats', 'StatsController@getTotalStats');
 Route::get('/standings', 'StatsController@getDuoStats');
+
+Route::get('/players', function () {
+    return Inertia::render('Players');
+});
+
+Route::get('/match', function () {
+    return Inertia::render('Match');
+});
+
+Route::get('/results', function () {
+    return Inertia::render('Results');
+});

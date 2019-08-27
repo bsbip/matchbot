@@ -111,8 +111,5 @@ export default {
     components: {
         InertiaLink,
     },
-    mounted: function() {
-        console.log(this.url);
-    },
 };
 </script>
