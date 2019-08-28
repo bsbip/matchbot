@@ -2,13 +2,28 @@
 
 namespace App;
 
-use App\Team;
 use App\Event;
+use App\Team;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Result extends Model
 {
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'score',
+        'crawl_score',
+        'team_id',
+        'event_id',
+        'note',
+        'event_team_id',
+        'deleted',
+    ];
+
     /**
      * Team relationship
      *

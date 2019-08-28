@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Event;
 use App\EventTeam;
+use App\Http\Requests\CreateCustomEventRequest;
+use App\Http\Requests\UpdateEventRequest;
 use App\Jobs\CalculatePoints;
 use App\Jobs\CreateMatch;
 use App\Jobs\InitiateMatch;
@@ -17,13 +19,11 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\PaginatedResourceResponse;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response as InertiaResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Validator;
 
 /**
  * Actions for matches
@@ -52,7 +52,6 @@ class MatchController extends Controller
                 ], Response::HTTP_OK);
             }
         }
-
         InitiateMatch::dispatch($request->all());
 
         return new JsonResponse([
@@ -87,9 +86,9 @@ class MatchController extends Controller
             $users = getUsersBySlackId($request->input('users'));
             $this->dispatch(new CreateMatch('', $users));
 
-            $msg = 'Aanvraag ontvangen via webinterface. ';
-            $msg .= "Even geduld alsjeblieft, Matchbot probeert teams samen te stellen.\n";
-            $msg .= '*' . sizeof($users) . ' potentiële spelers*';
+            $message = 'Aanvraag ontvangen via webinterface. ';
+            $message .= "Even geduld alsjeblieft, Matchbot probeert teams samen te stellen.\n";
+            $message .= '*' . sizeof($users) . ' potentiële spelers*';
 
             foreach ($users as $user) {
                 $attachments[] = [
@@ -102,14 +101,14 @@ class MatchController extends Controller
                 'response_type' => 'in_channel',
                 'username' => 'Matchbot',
                 'icon_url' => asset('assets/img/matchbot-icon.jpg'),
-                'text' => $msg,
+                'text' => $message,
                 'attachments' => $attachments,
             ];
 
             sendSlackResponse($data, env('SLACK_WEBHOOK_URL'));
 
             $data = [
-                'msg' => $msg,
+                'msg' => $message,
             ];
 
         } else {
@@ -137,40 +136,9 @@ class MatchController extends Controller
      *
      * @author Ramon Bakker <ramonbakker@rambit.nl>
      */
-    public function createCustom(Request $request, $minUsers = null): JsonResponse
+    public function createCustom(CreateCustomEventRequest $request): JsonResponse
     {
-        if (is_null($minUsers)) {
-            $minUsers = Config::get('match.min_users');
-        }
-
-        $userIds = [];
-        $users = json_decode(json_encode($request->all()), false);
-
-        // Validate users
-        if (sizeof($users) !== $minUsers) {
-            return new JsonResponse([
-                'msg' => 'Er zijn ' . $minUsers . ' spelers nodig.',
-                'errors' => new \StdClass(),
-            ], Response::HTTP_NOT_ACCEPTABLE);
-        }
-
-        foreach ($users as $user) {
-            if (!isset($user->id)) {
-                return new JsonResponse([
-                    'msg' => 'Speler niet gevonden. Er zijn ' . $minUsers . ' spelers nodig.',
-                    'errors' => new \StdClass(),
-                ], Response::HTTP_INTERNAL_SERVER_ERROR);
-            }
-
-            if (array_key_exists($user->id, $userIds)) {
-                return new JsonResponse([
-                    'msg' => 'Speler ' . $user->real_name . ' is meerdere keren geselecteerd.',
-                    'errors' => new \StdClass(),
-                ], Response::HTTP_NOT_ACCEPTABLE);
-            }
-
-            $userIds[$user->id] = true;
-        }
+        $users = json_decode(json_encode($request->input('users')));
 
         return createMatch($users, false);
     }
@@ -178,16 +146,18 @@ class MatchController extends Controller
     /**
      * Get the user list.
      *
-     * @return JsonResponse
+     * @return JsonResponse|InertiaResponse
      *
      * @author Ramon Bakker <ramonbakker@rambit.nl>
+     * @author Roy Freij <roy@bsbip.com>
      */
-    public function getUserList(): JsonResponse
+    public function getUserList(Request $request)
     {
         $data = [];
         $players = Player::where('default', true)
             ->pluck('user_id')
             ->toArray();
+
         $users = getSlackUserList(env('SLACK_TOKEN'));
 
         foreach ($users as $user) {
@@ -200,11 +170,25 @@ class MatchController extends Controller
                 $data[] = $user;
             }
 
-            // Determine if user is in list with default players
             $user->default = array_search($user->id, $players) !== false;
         }
 
-        return new JsonResponse($data);
+        if (Str::contains($request->header('Accept'), 'application/json')) {
+            return new JsonResponse([
+                $data,
+            ]);
+        }
+
+        $component = 'Match';
+
+        if ($request->routeIs('players')) {
+            $component = 'Players';
+        }
+
+        return Inertia::render($component, [
+            'data' => $data,
+        ]);
+
     }
 
     /**
@@ -331,6 +315,7 @@ class MatchController extends Controller
      * @return JsonResponse|InertiaResponse
      *
      * @author Ramon Bakker <ramonbakker@rambit.nl>
+     * @author Roy Freij <roy@bsbip.com>
      */
     public function getEventResults(Request $request)
     {
@@ -409,14 +394,15 @@ class MatchController extends Controller
      * @param string $statusType event status type
      * @param bool $limit true to limit
      *
-     * @return JsonResponse
+     * @return JsonResponse|InertiaResponse
      *
      * @author Ramon Bakker <ramonbakker@rambit.nl>
+     * @author Roy Freij <roy@bsbip.com>
      */
-    public function getEvents(Request $request): InertiaResponse
+    public function getEvents(Request $request)
     {
         $statusType = $request->query('statusType', 'without-results');
-        $limited = $request->has('limit');
+        $limited = $request->has('limited');
 
         $events = Event::query()
             ->when($statusType === 'with-results', function ($query) {
@@ -436,20 +422,22 @@ class MatchController extends Controller
                 'eventTeams' => function ($query) {
                     $query->with([
                         'team',
-                        'result' => function ($query) {
-                            $query->where('deleted', false);
-                        },
+                        'result',
                     ]);
                 },
             ])
             ->orderByDesc('start')
             ->get();
 
-        return Inertia::render('Results', [
-            'events' => $events,
-        ]);
+        $data = [
+            'events' => $events->toArray(),
+        ];
 
-        return new JsonResponse($events);
+        if (Str::contains($request->header('Accept'), 'application/json')) {
+            return new JsonResponse($data);
+        }
+
+        return Inertia::render('Results', $data);
     }
 
     /**
@@ -462,131 +450,56 @@ class MatchController extends Controller
      *
      * @author Ramon Bakker <ramonbakker@rambit.nl>
      */
-    public function saveResult(Request $request, $update = false): JsonResponse
+    public function saveResult(UpdateEventRequest $request): JsonResponse
     {
-        $update = filter_var($update, FILTER_VALIDATE_BOOLEAN);
-        $matchId = $request->input('id');
-        $scores = [];
-        $crawlScores = [];
-        $note = $request->input('note');
-        $errors = [
-            'errors' => new \StdClass(),
-            'msg' => '',
-        ];
-
-        $scores[0] = $request->input('scoreTeam1');
-        $scores[1] = $request->input('scoreTeam2');
-
-        $crawlScores[0] = $request->input('crawlsTeam1');
-        $crawlScores[1] = $request->input('crawlsTeam2');
-
-        if (!isset($note)) {
-            $note = '';
-        }
-
-        $validation = Validator::make(
-            [
-                'event_id' => $matchId,
-                'score_team1' => $scores[0],
-                'score_team2' => $scores[1],
-                'crawl_score_team1' => $crawlScores[0],
-                'crawl_score_team2' => $crawlScores[1],
-            ],
-            [
-                'event_id' => 'required',
-                'score_team1' => 'required',
-                'score_team1' => 'required',
-                'crawl_score_team1' => 'required',
-                'crawl_score_team2' => 'required',
-            ]
-        );
-
-        if ($validation->fails()) {
-            return new JsonResponse([
-                'errors' => $validation->errors(),
-                'msg' => 'Vul de benodigde velden in.',
-            ], Response::HTTP_NOT_ACCEPTABLE);
-        }
-
-        $eventTeams = EventTeam::where('event_teams.event_id', $matchId)
-            ->orderBy('id', 'asc')
-            ->get();
-
-        if (sizeof($eventTeams) == 0) {
-            $errors['msg'] = 'Match niet gevonden.';
-
-            return new JsonResponse($errors, Response::HTTP_NOT_FOUND);
-        }
+        $update = $request->isMethod(Request::METHOD_PUT);
+        $matchId = $request->input('event_id');
 
         DB::beginTransaction();
 
-        // Update event info
         $event = Event::find($matchId);
 
         if (isset($event)) {
             if (!$update) {
-                $event->end = date('Y-m-d H:i:s');
+                $event->end = Carbon::now();
             }
 
             $event->status = 1;
             $event->save();
         }
 
-        // Check if results for this event are already saved
         $results = Result::where('event_id', $matchId)
             ->where('deleted', false)
             ->get();
 
         if (sizeof($results) > 0 && !$update) {
-            $responseText = 'Resultaten zijn reeds opgeslagen.';
-
-            if (sizeof($results) === 2) {
-                $errors['errors']->score = [];
-                $errors['errors']->score[] = 'Score: ' . $results[0]->score . '-' . $results[1]->score;
-                $errors['errors']->crawl_score = [];
-                $errors['errors']->crawl_score[] = 'Kruipscore: ' . $results[0]->crawl_score . '-' . $results[1]->crawl_score;
-                $errors['errors']->note = [];
-                $errors['errors']->note[] = 'Commentaar: ' . $results[0]->note;
-            }
-
-            $errors['msg'] = $responseText;
-
-            return new JsonResponse($errors, Response::HTTP_CONFLICT);
+            return new JsonResponse([
+                'message' => trans('results.already_saved'),
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        // Save results
+        $eventTeams = EventTeam::where('event_teams.event_id', $matchId)
+            ->orderBy('id')
+            ->get();
+
         foreach ($eventTeams as $key => $eventTeam) {
-            if (!isset($scores[$key]) || !isset($crawlScores[$key])) {
-                $errors['msg'] = 'De (kruip)score is in een verkeerd formaat ingevoerd.';
+
+            $teamResults = $request->get('teams')[0];
+
+            if ($key === 1) {
+                $teamResults = $request->get('teams')[1];
             }
 
-            if ($update) {
-                $result = Result::where('event_id', $matchId)
-                    ->where('deleted', false)
-                    ->where('team_id', $eventTeam->team_id)
-                    ->first();
-
-                if (!isset($result)) {
-                    $errors['msg'] = "Geen resultaten gevonden.\n";
-
-                    return new JsonResponse($errors, Response::HTTP_NOT_ACCEPTABLE);
-                }
-            } else {
-                $result = new Result();
-            }
-
-            $result->event_id = $matchId;
-            $result->team_id = $eventTeam->team_id;
-            $result->score = $scores[$key];
-            $result->crawl_score = $crawlScores[$key];
-            $result->note = $note;
-            $result->event_team_id = $eventTeam->id;
-
-            if (!$result->save()) {
-                $errors['msg'] = 'Opslaan van resultaten is mislukt.';
-
-                return new JsonResponse($errors, Response::HTTP_INTERNAL_SERVER_ERROR);
-            }
+            Result::updateOrCreate([
+                'team_id' => $eventTeam->team_id,
+                'event_id' => $matchId,
+                'deleted' => false,
+            ], [
+                'score' => $teamResults['score'],
+                'crawl_score' => $teamResults['crawl_score'],
+                'note' => $request->input('note') ?? '',
+                'event_team_id' => $eventTeam->id,
+            ]);
         }
 
         DB::commit();
@@ -601,10 +514,10 @@ class MatchController extends Controller
             ->get();
 
         if ($update) {
-            $msg = 'Resultaten zijn gewijzigd.';
+            $message = 'Resultaten zijn gewijzigd.';
             $slackResponseText = 'De resultaten voor match ' . $matchId . ' zijn gewijzigd.';
         } else {
-            $msg = 'Resultaten zijn toegevoegd.';
+            $message = 'Resultaten zijn toegevoegd.';
             $slackResponseText = 'De resultaten voor match ' . $matchId . ' zijn toegevoegd.';
         }
 
@@ -623,7 +536,7 @@ class MatchController extends Controller
         CalculatePoints::dispatch();
 
         return new JsonResponse([
-            'msg' => $msg,
+            'message' => $message,
         ]);
     }
 

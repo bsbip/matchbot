@@ -5,4 +5,16 @@
     @apply font-bold;
 }
 
+.alert--success, .selected {
+    @apply bg-green-400;
+}
+
+.alert--failure {
+    @apply bg-red-400;
+}
+
+.has-errors {
+    @apply border-red-500;
+}
+
 @tailwind utilities;

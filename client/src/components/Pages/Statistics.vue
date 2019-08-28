@@ -1,7 +1,7 @@
 <template>
     <layout>
-        <h1 class="text-3xl block">Statistieken</h1>
-        <section class="flex flex-row items-center">
+        <h1 class="text-3xl block mb-4">Statistieken</h1>
+        <section class="flex flex-row items-center mb-4">
             <div class="inline-block relative w-64 mr-8">
                 <select
                     class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"

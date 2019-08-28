@@ -1,13 +1,17 @@
 import { InertiaApp } from '@inertiajs/inertia-vue';
 
 import Vue from 'vue';
-import './plugins/axios'
+import './plugins/axios';
 
 import '../main.css';
 
 const app = document.getElementById('app');
 
 Vue.config.productionTip = true;
+
+Vue.filter('date', function(value) {
+    return new Date(value).toLocaleString('nl-NL');
+});
 
 new Vue({
     render: (h) =>

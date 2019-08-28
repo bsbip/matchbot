@@ -1,6 +1,6 @@
 <template>
     <layout>
-        <h1 class="text-3xl block">
+        <h1 class="text-3xl block mb-4">
             {{ collection.total }} wedstrijden gevonden
         </h1>
         <Card>

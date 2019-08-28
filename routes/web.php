@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\MatchController;
 use App\Http\Controllers\StatsController;
-use Inertia\Inertia;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,13 +17,6 @@ use Inertia\Inertia;
 Route::get('/', [MatchController::class, 'getEventResults']);
 Route::get('/stats', [StatsController::class, 'getTotalStats']);
 Route::get('/standings', [StatsController::class, 'getDuoStats']);
-
-Route::get('/players', function () {
-    return Inertia::render('Players');
-});
-
-Route::get('/match', function () {
-    return Inertia::render('Match');
-});
-
+Route::get('/match', [MatchController::class, 'getUserList'])->name('match');
+Route::get('/players', [MatchController::class, 'getUserList'])->name('players');
 Route::get('/results', [MatchController::class, 'getEvents']);

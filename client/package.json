@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "rm -rf '../public/js' && rm -rf '../public/css' && rm -rf '../public/img' && vue-cli-service build --no-clean",
+    "build": "rm -rf '../public/js' && rm -rf '../public/css' && rm -rf '../public/img' && rm -rf '../public/assets' && vue-cli-service build --no-clean",
     "lint": "vue-cli-service lint",
     "build-watch": "rm -rf '../public/js' && rm -rf '../public/css' && rm -rf '../public/img' && vue-cli-service build-watch --no-clean"
   },

@@ -2,18 +2,18 @@
 
 namespace App\Jobs;
 
-use Carbon\Carbon;
 use App\EventInitiation;
 use App\EventInitiationUser;
-use Illuminate\Bus\Queueable;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Config;
 use App\Jobs\CreateMatchFromInitiation;
-use Illuminate\Queue\InteractsWithQueue;
+use Carbon\Carbon;
+use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Job for initiating a match
@@ -59,6 +59,7 @@ class InitiateMatch implements ShouldQueue
         }
 
         if (isset($this->input['user_id'])) {
+
             $user = getSlackUser($this->input['user_id']);
             $usersChosenText = ":heavy_check_mark: {$user->profile->real_name}";
             $potentialPlayersAmount = 1;

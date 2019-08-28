@@ -59,6 +59,7 @@
                 <li class="mr-3 py-2 lg:py-0">
                     <inertia-link
                         href="/results"
+                        :data="{ limited: true }"
                         class="inline-block text-gray-600 no-underline hover:text-gray-900 hover:underline py-2 px-4"
                         v-bind:class="{
                             active: url === '/results',

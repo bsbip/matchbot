@@ -8,6 +8,7 @@ import axios from 'axios';
 // axios.defaults.headers.common['Authorization'] = AUTH_TOKEN;
 // axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
 axios.defaults.headers.post['Accept'] = 'application/json';
+axios.defaults.headers.post['Content-Type'] = 'application/json';
 
 let config = {
     // baseURL: process.env.baseURL || process.env.apiUrl || ""
@@ -24,7 +25,7 @@ _axios.interceptors.request.use(
     },
     function(error) {
         // Do something with request error
-        return Promise.reject(error);
+        return Promise.reject(error.response);
     },
 );
 
@@ -36,7 +37,7 @@ _axios.interceptors.response.use(
     },
     function(error) {
         // Do something with response error
-        return Promise.reject(error);
+        return Promise.reject(error.response);
     },
 );
 

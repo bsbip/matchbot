@@ -1,11 +1,11 @@
 <?php
 
-use App\Team;
 use App\Event;
-use App\Player;
-use App\EventTeam;
-use App\TeamPlayer;
 use App\EventInitiation;
+use App\EventTeam;
+use App\Player;
+use App\Team;
+use App\TeamPlayer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Config;
 
@@ -308,6 +308,6 @@ function createMatch(array $activeUsers, bool $random = true, $eventInitiation =
     sendSlackResponse($data, env('SLACK_WEBHOOK_URL'));
 
     return new JsonResponse([
-        'msg' => 'Match is aangemaakt.',
+        'message' => 'Match is aangemaakt.',
     ]);
 }
