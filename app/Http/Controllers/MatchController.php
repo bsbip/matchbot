@@ -4,20 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Event;
 use App\EventTeam;
-use App\Http\Resources\EventResourceCollection;
 use App\Jobs\CalculatePoints;
 use App\Jobs\CreateMatch;
 use App\Jobs\InitiateMatch;
 use App\Player;
 use App\Result;
+use App\Support\PeriodSupport;
 use Carbon\Carbon;
 use DB;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\PaginatedResourceResponse;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response as InertiaResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -326,11 +328,11 @@ class MatchController extends Controller
      * @param int $page
      * @param int $limit
      *
-     * @return JsonResponse
+     * @return JsonResponse|InertiaResponse
      *
      * @author Ramon Bakker <ramonbakker@rambit.nl>
      */
-    public function getEventResults(Request $request): InertiaResponse
+    public function getEventResults(Request $request)
     {
         $results = [];
 
@@ -343,9 +345,17 @@ class MatchController extends Controller
             ->orderBy('events.end', 'desc')
             ->paginate((int) $request->query('limit', 25));
 
-        return Inertia::render('Overview',
-            (new EventResourceCollection($results))->toArray($request)
-        );
+        $data = (new PaginatedResourceResponse($results))->resource;
+
+        if (Str::contains($request->header('Accept'), 'application/json')) {
+            return new JsonResponse([
+                'collection' => $data->toArray(),
+            ]);
+        }
+
+        return Inertia::render('Overview', [
+            'collection' => $data->toArray(),
+        ]);
     }
 
     /**
@@ -403,34 +413,41 @@ class MatchController extends Controller
      *
      * @author Ramon Bakker <ramonbakker@rambit.nl>
      */
-    public function getEvents(string $statusType = 'all', bool $limit = true): JsonResponse
+    public function getEvents(Request $request): InertiaResponse
     {
-        $events = Event::with([
-            'eventTeams' => function ($q) {
-                $q->with(['result' => function ($q) {
-                    $q->where('deleted', false);
-                }]);
-                $q->with('team');
-            }]);
+        $statusType = $request->query('statusType', 'without-results');
+        $limited = $request->has('limit');
 
-        if ($statusType === 'with-results') {
-            $events = $events->where('events.status', '>', 0);
-        } elseif ($statusType === 'without-results') {
-            $events = $events->where('events.status', 0);
-        }
-
-        if ($limit) {
-            $startDate = new \DateTime();
-            $startDate->sub(new \DateInterval('P7D'));
-            $endDate = new \DateTime();
-            $events = $events->whereBetween('events.created_at', [
-                $startDate,
-                $endDate,
-            ]);
-        }
-
-        $events = $events->orderBy('events.start', 'desc')
+        $events = Event::query()
+            ->when($statusType === 'with-results', function ($query) {
+                $query->where('status', '>', 0);
+            })
+            ->when($statusType === 'without-results', function ($query) {
+                $query->where('status', 0);
+            })
+            ->when($limited, function ($query) {
+                $period = PeriodSupport::lastSevenDays();
+                $query->whereBetween('events.created_at', [
+                    $period->from,
+                    $period->to,
+                ]);
+            })
+            ->with([
+                'eventTeams' => function ($query) {
+                    $query->with([
+                        'team',
+                        'result' => function ($query) {
+                            $query->where('deleted', false);
+                        },
+                    ]);
+                },
+            ])
+            ->orderByDesc('start')
             ->get();
+
+        return Inertia::render('Results', [
+            'events' => $events,
+        ]);
 
         return new JsonResponse($events);
     }

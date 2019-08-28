@@ -27,6 +27,7 @@ export default {
         {
             text: 'Gemiddelde teamscore',
             property: 'avgscore',
+            addition: '/match',
         },
         {
             text: 'Kruipscore',
@@ -35,6 +36,7 @@ export default {
         {
             text: 'Gemiddelde kruipscore',
             property: 'avgcrawlscore',
+            addition: '/match',
         },
     ],
     periods: [

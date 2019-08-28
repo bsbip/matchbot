@@ -2,9 +2,9 @@
     <layout>
         <h1 class="text-3xl block">Statistieken</h1>
         <section class="flex flex-row items-center">
-            <div class="relative">
+            <div class="inline-block relative w-64 mr-8">
                 <select
-                    class="block appearance-none w-full mr-8 bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                    class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
                     v-model="selectedPeriod"
                     v-on:change="changeFilter()"
                 >
@@ -29,9 +29,9 @@
                     </svg>
                 </div>
             </div>
-            <div class="relative">
+            <div class="inline-block relative w-64">
                 <select
-                    class="block appearance-none w-full m-4 bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                    class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
                     v-model="selectedOrderOption"
                     v-on:change="changeFilter()"
                 >
@@ -57,7 +57,7 @@
                 </div>
             </div>
         </section>
-        <div class="bg-white w-full shadow-md rounded my-6 overflow-x-auto">
+        <Card>
             <table
                 class="text-left w-full border-collapse"
                 v-if="data.length > 0"
@@ -83,7 +83,10 @@
                             v-for="field in fields"
                             v-bind:key="field.text"
                             :field="field.property"
-                            :value="statistic[field.property]"
+                            :value="
+                                `${statistic[field.property]}${field.addition ||
+                                    ''}`
+                            "
                         />
                     </tr>
                 </tbody>
@@ -95,7 +98,7 @@
             >
                 <p>Geen statistieken gevonden</p>
             </div>
-        </div>
+        </Card>
     </layout>
 </template>
 
@@ -103,6 +106,7 @@
 import Layout from '@shared/Layout.vue';
 import TableHeader from '@shared/Table/TableHeader.vue';
 import TableColumn from '@shared/Table/TableColumn.vue';
+import Card from '@shared/Card.vue';
 
 import statistics from '../../config/statistics';
 
@@ -114,6 +118,7 @@ export default {
         Layout,
         TableHeader,
         TableColumn,
+        Card,
     },
     props: {
         data: Array,

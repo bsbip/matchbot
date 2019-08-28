@@ -8,10 +8,15 @@
         </header>
 
         <section
-            class="container w-full flex flex-col flex-wrap mx-auto px-2 pt-8 lg:pt-16 mt-16"
+            class="container w-full flex flex-col flex-wrap mx-auto px-2 pt-8 lg:pt-16 mt-8"
         >
             <slot />
         </section>
+        <footer
+            class="w-full p-8 mt-8 bg-white w-full border-t border-gray-400"
+        >
+            <section></section>
+        </footer>
     </main>
 </template>
 

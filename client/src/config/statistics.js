@@ -155,6 +155,7 @@ export default {
         {
             text: 'Gemiddelde teamscore',
             property: 'score_avg',
+            addition: '/match',
         },
         {
             text: 'Kruipscore',
@@ -163,6 +164,7 @@ export default {
         {
             text: 'Gemiddelde kruipscore',
             property: 'crawl_score_avg',
+            addition: '/match',
         },
         {
             text: 'Punten',
