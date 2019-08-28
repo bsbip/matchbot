@@ -13,7 +13,7 @@
             <slot />
         </section>
         <footer
-            class="w-full p-8 mt-8 bg-white w-full border-t border-gray-400"
+            class="w-full p-8 mt-8 bg-white w-full border-t border-gray-400 pin-b"
         >
             <section></section>
         </footer>

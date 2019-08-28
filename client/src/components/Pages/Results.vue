@@ -10,6 +10,7 @@
                     >
                         Resultaten wijzigen?
                     </label>
+                    Switch werkt niet 😑
                     <Switch v-model="update" />
                 </div>
                 <div class="mb-4">
