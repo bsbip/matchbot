@@ -24,9 +24,24 @@ class Event extends Model
         return $this->hasMany(EventTeam::class, 'event_id', 'id');
     }
 
+    /**
+     * Teams relationship
+     *
+     * @return HasManyThrough
+     *
+     * @author Roy Freij <roy@bsbip.com>
+     * @version 1.0.0
+     */
     public function teams(): HasManyThrough
     {
-        return $this->hasManyThrough(Team::class, EventTeam::class, 'event_id', 'id', 'id', 'team_id');
+        return $this->hasManyThrough(
+            Team::class,
+            EventTeam::class,
+            'event_id',
+            'id',
+            'id',
+            'team_id'
+        );
     }
 
     /**

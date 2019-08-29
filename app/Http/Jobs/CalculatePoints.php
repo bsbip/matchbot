@@ -152,10 +152,10 @@ class CalculatePoints implements ShouldQueue
      */
     public function setPointsPerPlayer(Player $player, EventTeam $team): float
     {
-        $percentage = ($player->points / $team->points);
-
         if ($team->points === 0) {
             $percentage = 0.50;
+        } else {
+            $percentage = ($player->points / $team->points);
         }
 
         if ($team->win) {
