@@ -17,6 +17,7 @@ module.exports = {
             alias: {
                 vue$: 'vue/dist/vue.runtime.esm.js',
                 '@shared': path.resolve('src/components/Shared'),
+                '@service': path.resolve('src/services'),
             },
         },
     },

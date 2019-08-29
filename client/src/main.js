@@ -2,12 +2,15 @@ import { InertiaApp } from '@inertiajs/inertia-vue';
 
 import Vue from 'vue';
 import './plugins/axios';
-
 import '../main.css';
+
+import ToastService from './services/ToastService';
 
 const app = document.getElementById('app');
 
 Vue.config.productionTip = true;
+
+Vue.prototype.$toastService = new ToastService();
 
 Vue.filter('date', function(value) {
     return new Date(value).toLocaleString('nl-NL');

@@ -10,6 +10,19 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 class Player extends Model
 {
     /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'name',
+        'user_id',
+        'username',
+        'status',
+        'default',
+    ];
+
+    /**
      * Team players relationship
      *
      * @return HasMany

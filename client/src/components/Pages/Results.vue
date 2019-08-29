@@ -10,14 +10,7 @@
                     >
                         Resultaten wijzigen?
                     </label>
-                    Switch werkt nog niet 😑
-                    <Switch v-model="update" />
-
-                    <input
-                        v-model="update"
-                        type="checkbox"
-                        v-on:change="updateChanged()"
-                    />
+                    <Toggle v-model="update" @change="updateChanged()" />
                 </div>
                 <div class="mb-4">
                     <label
@@ -213,9 +206,9 @@
 <script>
 import Layout from '@shared/Layout.vue';
 import Card from '@shared/Card.vue';
-import Switch from '@shared/Form/Switch.vue';
 import Loader from '@shared/Loader.vue';
 import Alert from '@shared/Alert.vue';
+import Toggle from '@shared/Form/Toggle.vue';
 
 const defaultForm = {
     teams: [
@@ -236,9 +229,9 @@ export default {
     components: {
         Layout,
         Card,
-        Switch,
         Loader,
         Alert,
+        Toggle,
     },
     props: {
         events: {},

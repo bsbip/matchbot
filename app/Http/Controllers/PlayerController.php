@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Player;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 class PlayerController extends Controller
 {
     /**
-     * Add a new player.
+     * Adds or update player.
      *
      * @param  Request $request the request
      *
@@ -21,108 +21,47 @@ class PlayerController extends Controller
      *
      * @author Ramon Bakker <ramonbakker@rambit.nl>
      */
-    public function addPlayer(Request $request): JsonResponse
+    public function __invoke(Request $request, string $playerId): JsonResponse
     {
-        // Check if player already exists
-        $player = Player::where('user_id', $request->input('id'))
-            ->first();
+        $player = Player::where('user_id', $playerId)->first();
 
-        if (isset($player)) {
-            return new JsonResponse([
-                'msg' => 'Speler is al toegevoegd.',
-                'errors' => new \StdClass(),
-            ], Response::HTTP_CONFLICT);
+        if (!isset($player)) {
+            $slackUser = getSlackUser($playerId);
+
+            if (!isset($slackUser->id)) {
+                return new JsonResponse([
+                    'message' => 'Gebruiker is niet gevonden.',
+                    'errors' => [],
+                ], Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
+
+            $player = new Player([
+                'name' => $slackUser->real_name,
+                'user_id' => $slackUser->id,
+                'username' => $slackUser->name,
+                'status' => 1,
+            ]);
         }
 
-        // Get Slack user
-        $slackUser = getSlackUser($request->input('id'));
-
-        if (sizeof($slackUser) === 0) {
-            return new JsonResponse([
-                'msg' => 'Gebruiker is niet gevonden.',
-                'errors' => new \StdClass(),
-            ], Response::HTTP_NOT_FOUND);
-        }
-
-        $player = new Player();
-        $player->name = $slackUser->real_name;
-        $player->user_id = $slackUser->id;
-        $player->username = $slackUser->name;
-        $player->status = 1;
         $player->default = $request->input('default');
+        $player->save();
 
-        if (!$player->save()) {
-            return new JsonResponse([
-                'msg' => 'Er is iets fout gegaan bij het opslaan van de speler.',
-                'errors' => new \StdClass(),
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        $message = "Speler {$player->name} is %s de spelerlijst.";
+        $message = sprintf($message, $player->default ? 'toegevoegd aan' : 'verwijderd van');
 
-        if ($player->default) {
-            $msg = 'Speler ' . $player->name . ' is toegevoegd aan de spelerslijst.';
-        } else {
-            $msg = 'Speler ' . $player->name . ' is verwijderd van de spelerslijst.';
-        }
-
+        // TODO Extract into service
         $data = [
             'response_type' => 'in_channel',
             'username' => 'Matchbot',
             'icon_url' => asset('assets/img/matchbot-icon.jpg'),
-            'text' => $msg,
+            'text' => $message,
         ];
 
+        //  TODO export env to config files
         sendSlackResponse($data, env('SLACK_WEBHOOK_URL'));
 
         return new JsonResponse([
-            'msg' => $msg,
+            'message' => $message,
         ]);
     }
-
-    /**
-     * Update a player.
-     *
-     * @param  Request $request the request
-     *
-     * @return JsonResponse
-     *
-     * @author Ramon Bakker <ramonbakker@rambit.nl>
-     */
-    public function updatePlayer(Request $request): JsonResponse
-    {
-        $player = Player::where('user_id', $request->input('id'))
-            ->first();
-
-        if (!isset($player)) {
-            return $this->addPlayer($request);
-        } else {
-            $player->default = $request->input('default');
-
-            if (!$player->save()) {
-                return new JsonResponse([
-                    'msg' => 'Er is iets fout gegaan bij het wijzigen van de speler.',
-                    'errors' => new \StdClass(),
-                ], Response::HTTP_INTERNAL_SERVER_ERROR);
-            }
-
-            if ($player->default) {
-                $msg = 'Speler ' . $player->name . ' is toegevoegd aan de spelerslijst.';
-            } else {
-                $msg = 'Speler ' . $player->name . ' is verwijderd van de spelerslijst.';
-            }
-
-            $data = [
-                'response_type' => 'in_channel',
-                'username' => 'Matchbot',
-                'icon_url' => asset('assets/img/matchbot-icon.jpg'),
-                'text' => $msg,
-            ];
-
-            sendSlackResponse($data, env('SLACK_WEBHOOK_URL'));
-
-            return new JsonResponse([
-                'msg' => $msg,
-            ]);
-        }
-    }
-
 }

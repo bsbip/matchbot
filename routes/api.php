@@ -13,6 +13,7 @@
 
 use App\Http\Controllers\InteractionController;
 use App\Http\Controllers\MatchController;
+use App\Http\Controllers\PlayerController;
 use App\Http\Controllers\StatsController;
 
 Route::group(['prefix' => 'slack'], function () {
@@ -35,3 +36,4 @@ Route::group(['prefix' => 'slack'], function () {
 Route::post('/match/result', [MatchController::class, 'saveResult']);
 Route::put('/match/result', [MatchController::class, 'saveResult']);
 Route::post('/match', [MatchController::class, 'createCustom']);
+Route::put('/players/{playerId}', PlayerController::class);

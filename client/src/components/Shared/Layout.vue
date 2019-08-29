@@ -1,5 +1,7 @@
 <template>
     <main>
+        <Toasts />
+
         <header
             id="header"
             class="fixed w-full z-10 top-0 bg-white border-b border-gray-400"
@@ -44,11 +46,13 @@
 
 <script>
 import Navigation from '@shared/Navigation';
+import Toasts from '@shared/Toasts.vue';
 
 export default {
     name: 'Layout',
     components: {
         Navigation,
+        Toasts,
     },
 };
 </script>

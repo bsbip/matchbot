@@ -17,4 +17,12 @@
     @apply border-red-500;
 }
 
+.toggle-active {
+    @apply bg-green-400 justify-end;
+}
+
+.toggle-inactive {
+    @apply justify-start bg-red-400;
+}
+
 @tailwind utilities;
