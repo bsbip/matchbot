@@ -7,7 +7,7 @@
             hij of zij iedere keer handmatig bij een matchaanvraag worden
             toegevoegd.
         </p>
-        <Card class="px-8 pt-6 pb-8">
+        <Card class="px-4 md:px-8 pt-3 md:pt-6 pb-4 md:pb-8">
             <table class="text-left w-full border-collapse mb-4">
                 <thead>
                     <TableHeader field="Speler" />

@@ -22,7 +22,7 @@ class Period
      * @param Carbon $from
      * @param Carbon $to
      *
-     * @author Roy Freij <roy@bsbip.com>
+     * @author Roy Freij <info@royfreij.nl>
      * @version 1.0.0
      */
     public function __construct(Carbon $from, Carbon $to)

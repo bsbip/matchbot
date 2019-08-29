@@ -2,7 +2,7 @@
     <layout>
         <h1 class="text-3xl block mb-4">Resultaten toevoegen/wijzigen</h1>
         <Card>
-            <form class="px-8 pt-6 pb-8">
+            <form class="px-4 md:px-8 pt-3 md:pt-6 pb-4 md:pb-8">
                 <div class="mb-4">
                     <label
                         class="block text-gray-700 text-sm font-bold mb-2"
@@ -48,7 +48,7 @@
                         v-if="loading.events"
                         width="25"
                         height="25"
-                        src="../../assets/loader.svg"
+                        src="/assets/img/loader.svg"
                     />
                 </div>
                 <Alert

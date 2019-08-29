@@ -55,7 +55,7 @@
             class="block text-center bg-blue-500 text-white text-sm font-bold px-4 py-3 rounded shadow-md hover:no-shadow hover:bg-blue-600"
         >
             <span v-if="!loading">Meer resultaten laden</span>
-            <img v-else src="../../assets/loader.svg" width="25" height="25" />
+            <img v-else src="/assets/img/loader.svg" width="25" height="25" />
         </button>
     </layout>
 </template>

@@ -149,7 +149,7 @@ class MatchController extends Controller
      * @return JsonResponse|InertiaResponse
      *
      * @author Ramon Bakker <ramonbakker@rambit.nl>
-     * @author Roy Freij <roy@bsbip.com>
+     * @author Roy Freij <info@royfreij.nl>
      */
     public function getUserList(Request $request)
     {
@@ -315,7 +315,7 @@ class MatchController extends Controller
      * @return JsonResponse|InertiaResponse
      *
      * @author Ramon Bakker <ramonbakker@rambit.nl>
-     * @author Roy Freij <roy@bsbip.com>
+     * @author Roy Freij <info@royfreij.nl>
      */
     public function getEventResults(Request $request)
     {
@@ -397,7 +397,7 @@ class MatchController extends Controller
      * @return JsonResponse|InertiaResponse
      *
      * @author Ramon Bakker <ramonbakker@rambit.nl>
-     * @author Roy Freij <roy@bsbip.com>
+     * @author Roy Freij <info@royfreij.nl>
      */
     public function getEvents(Request $request)
     {
@@ -598,6 +598,7 @@ class MatchController extends Controller
 
         DB::commit();
 
+        // TODO extract into service
         $data = [
             'response_type' => 'in_channel',
             'username' => 'Matchbot',
@@ -605,6 +606,7 @@ class MatchController extends Controller
             'text' => 'De resultaten voor match ' . $event->id . ' zijn verwijderd.',
         ];
 
+        // TODO export env to config files
         sendSlackResponse($data, env('SLACK_WEBHOOK_URL'));
 
         CalculatePoints::dispatch();

@@ -3,10 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
     "build": "rm -rf '../public/js' && rm -rf '../public/css' && rm -rf '../public/img' && rm -rf '../public/assets' && vue-cli-service build --no-clean",
-    "lint": "vue-cli-service lint",
-    "build-watch": "rm -rf '../public/js' && rm -rf '../public/css' && rm -rf '../public/img' && vue-cli-service build-watch --no-clean"
+    "lint": "vue-cli-service lint"
   },
   "dependencies": {
     "@babel/plugin-syntax-dynamic-import": "^7.2.0",

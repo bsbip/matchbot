@@ -34,7 +34,7 @@
                 </svg>
             </div>
         </div>
-        <Card class="px-8 pt-6 pb-8">
+        <Card class="px-4 md:px-8 pt-3 md:pt-6 pb-4 md:pb-8">
             <div v-if="matchType === 'random'">
                 <h2 class="text-x1 block mb-4">Potentiële spelers kiezen</h2>
                 <table class="text-left w-full border-collapse mb-4">
@@ -68,28 +68,53 @@
                         </tr>
                     </tbody>
                 </table>
-                <button
-                    v-on:click.prevent="createMatch()"
-                    v-bind:disabled="loading"
-                    class="block mb-4 text-center bg-blue-500 text-white text-sm font-bold px-4 py-3 rounded shadow-md hover:no-shadow hover:bg-blue-600"
-                >
-                    <span v-if="!loading">Aanmaken</span>
-                    <span v-else><Loader /></span>
-                </button>
+            </div>
+            <div v-else class="flex flex-col">
                 <div
-                    v-if="matchCreated || failure"
-                    :class="{
-                        'alert--failure': failure,
-                        'alert--success': matchCreated,
-                    }"
-                    class="flex items-center text-white text-sm font-bold px-4 py-3"
-                    role="alert"
+                    class="mb-4"
+                    v-bind:key="index"
+                    v-for="(selectedPlayer, index) in selectedPlayers"
                 >
-                    <p>{{ responseMessage }}</p>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        <span v-if="index <= 1">
+                            {{ `Team 1: speler ${index + 1}` }}
+                        </span>
+                        <span v-else>
+                            {{ `Team 2: speler ${index + 1}` }}
+                        </span>
+                    </label>
+                    <select
+                        v-model="selectedPlayers[index]"
+                        class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
+                    >
+                        <option :value="{}">Kies speler</option>
+                        <option
+                            v-for="player in players"
+                            v-bind:key="player.id"
+                            :value="player"
+                            >{{ player.real_name }} (@ {{ player.name }})
+                        </option></select
+                    >
                 </div>
             </div>
-            <div v-else>
-                <Alert message="Under construction" />
+            <button
+                v-on:click.prevent="createMatch()"
+                v-bind:disabled="loading"
+                class="block mb-4 text-center bg-blue-500 text-white text-sm font-bold px-4 py-3 rounded shadow-md hover:no-shadow hover:bg-blue-600"
+            >
+                <span v-if="!loading">Aanmaken</span>
+                <span v-else><Loader /></span>
+            </button>
+            <div
+                v-if="matchCreated || failure"
+                :class="{
+                    'alert--failure': failure,
+                    'alert--success': matchCreated,
+                }"
+                class="flex items-center text-white text-sm font-bold px-4 py-3"
+                role="alert"
+            >
+                <p>{{ responseMessage }}</p>
             </div>
         </Card>
     </layout>
@@ -101,7 +126,6 @@ import Card from '@shared/Card.vue';
 import TableHeader from '@shared/Table/TableHeader.vue';
 import TableColumn from '@shared/Table/TableColumn.vue';
 import Loader from '@shared/Loader.vue';
-import Alert from '@shared/Alert.vue';
 
 export default {
     name: 'Match',
@@ -111,7 +135,6 @@ export default {
         TableHeader,
         TableColumn,
         Loader,
-        Alert,
     },
     props: {
         data: Array,
@@ -168,13 +191,12 @@ export default {
             }
 
             if (this.matchType === 'custom') {
-                this.selectedPlayers = [];
+                this.selectedPlayers = [{}, {}, {}, {}];
             }
         },
     },
     mounted: function() {
         this.selectedPlayers = this.players.filter((player) => player.default);
-        console.log(this.selectedPlayers);
     },
 };
 </script>

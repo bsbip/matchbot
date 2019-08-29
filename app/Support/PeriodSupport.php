@@ -18,7 +18,7 @@ class PeriodSupport
      *
      * @throws UndefinedPeriodException
      *
-     * @author Roy Freij <roy@bsbip.com>
+     * @author Roy Freij <info@royfreij.nl>
      * @version 1.0.0
      */
     public static function retrieve(string $period): Period
@@ -37,7 +37,7 @@ class PeriodSupport
      *
      * @return Period
      *
-     * @author Roy Freij <roy@bsbip.com>
+     * @author Roy Freij <info@royfreij.nl>
      * @version 1.0.0
      */
     public static function currentMonth(): Period
@@ -53,7 +53,7 @@ class PeriodSupport
      *
      * @return Period
      *
-     * @author Roy Freij <roy@bsbip.com>
+     * @author Roy Freij <info@royfreij.nl>
      * @version 1.0.0
      */
     public static function currentWeek(): Period
@@ -69,7 +69,7 @@ class PeriodSupport
      *
      * @return Period
      *
-     * @author Roy Freij <roy@bsbip.com>
+     * @author Roy Freij <info@royfreij.nl>
      * @version 1.0.0
      */
     public static function today(): Period
@@ -85,7 +85,7 @@ class PeriodSupport
      *
      * @return Period
      *
-     * @author Roy Freij <roy@bsbip.com>
+     * @author Roy Freij <info@royfreij.nl>
      * @version 1.0.0
      */
     public static function yesterday(): Period
@@ -101,7 +101,7 @@ class PeriodSupport
      *
      * @return Period
      *
-     * @author Roy Freij <roy@bsbip.com>
+     * @author Roy Freij <info@royfreij.nl>
      * @version 1.0.0
      */
     public static function lastSevenDays(): Period
@@ -117,7 +117,7 @@ class PeriodSupport
      *
      * @return Period
      *
-     * @author Roy Freij <roy@bsbip.com>
+     * @author Roy Freij <info@royfreij.nl>
      * @version 1.0.0
      */
     public static function lastThirtyDays(): Period

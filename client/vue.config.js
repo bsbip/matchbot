@@ -3,14 +3,7 @@ const path = require('path');
 module.exports = {
     // proxy API requests to Valet during development
     devServer: {
-        proxy: {
-            '/api': {
-                target: 'http://127.0.0.1:8001',
-                ws: false,
-                changeOrigin: true,
-            },
-        },
-        disableHostCheck: true,
+        writeToDisk: true,
     },
     configureWebpack: {
         resolve: {
@@ -31,5 +24,5 @@ module.exports = {
     indexPath:
         process.env.NODE_ENV === 'production'
             ? '../resources/views/app.blade.php'
-            : 'index.html',
+            : '../resources/views/app.blade.php',
 };

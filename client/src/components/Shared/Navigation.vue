@@ -11,7 +11,7 @@
                 href="/"
                 class="text-gray-900 text-base no-underline hover:no-underline font-extrabold text-xl"
                 v-bind:class="{ active: url === '/' }"
-                >Matchbot</inertia-link
+                >{{ appName }}</inertia-link
             >
         </div>
         <div class="lg:hidden pr-4">
@@ -102,6 +102,7 @@ export default {
             navbarHidden: true,
             Inertia: Inertia,
             url: window.location.pathname,
+            appName: process.env.APP_NAME || 'Matchbot',
         };
     },
     methods: {

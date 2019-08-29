@@ -11,7 +11,7 @@ class UndefinedPeriodException extends Exception
      *
      * @param string $period
      *
-     * @author Roy Freij <roy@bsbip.com>
+     * @author Roy Freij <info@royfreij.nl>
      * @version 1.0.0
      */
     public function __construct(string $period)
