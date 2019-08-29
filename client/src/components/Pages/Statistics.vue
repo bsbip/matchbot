@@ -146,7 +146,12 @@ export default {
         },
     },
     mounted: function() {
-        this.selectedOrderOption = this.orderOptions[0];
+        this.selectedOrderOption = this.orderOptions.find((orderOption) => {
+            return (
+                orderOption.field === 'points' &&
+                orderOption.direction === 'desc'
+            );
+        });
         this.selectedPeriod = this.periods.find(
             (period) => period.code === 'all-time',
         );
@@ -154,11 +159,12 @@ export default {
         const urlParams = new URLSearchParams(window.location.search);
 
         if (urlParams.has('orderBy') && urlParams.has('orderDirection')) {
-            this.selectedOrderOption = this.orderOptions.find(
-                (orderOption) =>
+            this.selectedOrderOption = this.orderOptions.find((orderOption) => {
+                return (
                     orderOption.field === urlParams.get('orderBy') &&
-                    orderOption.direction === urlParams.get('orderDirection'),
-            );
+                    orderOption.direction === urlParams.get('orderDirection')
+                );
+            });
         }
 
         if (urlParams.has('period')) {

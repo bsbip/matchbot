@@ -81,11 +81,11 @@ class StatsController extends Controller
      *
      * @author Ramon Bakker <ramonbakker@rambit.nl>
      */
-    public function getTotalStats(Request $request, string $period = '', string $orderBy = 'id', string $orderDirection = 'asc'): InertiaResponse
+    public function getTotalStats(Request $request): InertiaResponse
     {
         $period = $request->query('period', '');
-        $orderBy = $request->query('orderBy', 'id');
-        $orderDirection = $request->query('orderDirection', 'asc');
+        $orderBy = $request->query('orderBy', 'points');
+        $orderDirection = $request->query('orderDirection', 'desc');
 
         $data = new Collection();
         $periodSet = $period !== '' && $period !== 'all-time';
