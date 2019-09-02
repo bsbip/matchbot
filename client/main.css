@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+
+.active {
+    @apply font-bold;
+}
+
+.alert--success, .selected {
+    @apply bg-green-400;
+}
+
+.alert--failure {
+    @apply bg-red-400;
+}
+
+.has-errors {
+    @apply border-red-500;
+}
+
+.toggle-active {
+    @apply bg-green-400 justify-end;
+}
+
+.toggle-inactive {
+    @apply justify-start bg-red-400;
+}
+
+@tailwind utilities;
