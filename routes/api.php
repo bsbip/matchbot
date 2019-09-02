@@ -18,16 +18,11 @@ use App\Http\Controllers\StatsController;
 
 Route::group(['prefix' => 'slack'], function () {
     Route::group([
-        'middleware' => 'auth.token.slack',
+        'middleware' => 'auth.signature.slack',
     ], function () {
         Route::post('/match', [MatchController::class, 'create']);
         Route::post('/match/result', [MatchController::class, 'saveResultSlack']);
         Route::get('/stats', [StatsController::class, 'getResult']);
-    });
-
-    Route::group([
-        'middleware' => 'auth.signature.slack',
-    ], function () {
         Route::post('/match/initiate', [MatchController::class, 'initiate']);
         Route::post('/interaction', [InteractionController::class, 'handle']);
     });
