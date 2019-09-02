@@ -544,56 +544,34 @@ class MatchController extends Controller
      * Delete the result of a match.
      * Performs a soft delete.
      *
-     * @param int $id the id of the match
+     * @param Event $event
      *
      * @return JsonResponse
      *
      * @author Ramon Bakker <ramonbakker@rambit.nl>
+     * @author Roy Freij <info@royfreij.nl>
      */
-    public function deleteResult(int $id): JsonResponse
+    public function deleteResult(int $eventId): JsonResponse
     {
-        $errors = [
-            'errors' => new \StdClass(),
-            'msg' => '',
-        ];
-
-        $results = Result::where('event_id', $id)
-            ->where('deleted', false)
-            ->get();
-
-        if (sizeof($results) === 0) {
-            $errors['msg'] = 'Resultaten niet gevonden.';
-
-            return new JsonResponse($errors, Response::HTTP_NOT_FOUND);
-        }
-
-        $event = Event::where('id', $results[0]->event_id)
-            ->where('status', '>', 0)
-            ->first();
-
-        if (!isset($event)) {
-            $errors['msg'] = 'Match niet gevonden.';
-
-            return new JsonResponse($errors, Response::HTTP_NOT_FOUND);
-        }
+        $event = Event::findOrFail($eventId);
 
         DB::beginTransaction();
 
-        foreach ($results as $result) {
-            $result->deleted = true;
-            if (!$result->save()) {
-                $errors['msg'] = 'Het verwijderen van resultaten is mislukt.';
+        $resultsUpdated = Result::where([
+            'event_id' => $event->id,
+            'deleted' => false,
+        ])->update([
+            'deleted' => true,
+        ]);
 
-                return new JsonResponse($errors, Response::HTTP_INTERNAL_SERVER_ERROR);
-            }
-        }
-
-        $event->status = 0;
-
-        if (!$event->save()) {
-            $errors['msg'] = 'Het verwijderen van resultaten is mislukt.';
-
-            return new JsonResponse($errors, Response::HTTP_INTERNAL_SERVER_ERROR);
+        if ($resultsUpdated > 0) {
+            $event->update([
+                'status' => false,
+            ]);
+        } else {
+            return new JsonResponse([
+                'message' => 'Resultaten niet gevonden',
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         DB::commit();
@@ -612,7 +590,7 @@ class MatchController extends Controller
         CalculatePoints::dispatch();
 
         return new JsonResponse([
-            'msg' => 'De resultaten zijn verwijderd.',
+            'message' => 'De resultaten zijn verwijderd.',
         ]);
     }
 

@@ -2,13 +2,14 @@
 
 namespace App;
 
+use App\EventTeam;
 use App\Player;
 use App\Result;
-use App\EventTeam;
 use App\TeamPlayer;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Team extends Model
 {
@@ -58,5 +59,25 @@ class Team extends Model
     public function players(): BelongsToMany
     {
         return $this->belongsToMany(Player::class, 'team_players', 'team_id', 'player_id');
+    }
+
+    /**
+     * Events relationship
+     *
+     * @return HasManyThrough
+     *
+     * @author Roy Freij <roy@bsbip.com>
+     * @version 1.0.0
+     */
+    public function events(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            Event::class,
+            EventTeam::class,
+            'event_id',
+            'id',
+            'id',
+            'team_id'
+        );
     }
 }

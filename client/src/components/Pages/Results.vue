@@ -179,19 +179,33 @@
                         id="note"
                     ></textarea>
                 </div>
-                <button
-                    v-on:click.prevent="saveResults()"
-                    v-bind:disabled="loading.results"
-                    class="block mb-4 text-center bg-blue-500 text-white text-sm font-bold px-4 py-3 rounded shadow-md hover:no-shadow hover:bg-blue-600"
-                >
-                    <span v-if="!loading.results">Opslaan</span>
-                    <span v-else><Loader /></span>
-                </button>
+                <div class="flex flex-row">
+                    <button
+                        v-on:click.prevent="saveResults()"
+                        v-bind:disabled="loading.results"
+                        class="block mr-4 mb-4 text-center bg-blue-500 text-white text-sm font-bold px-4 py-3 rounded shadow-md hover:no-shadow hover:bg-blue-600"
+                    >
+                        <span v-if="!loading.results">Opslaan</span>
+                        <span v-else><Loader /></span>
+                    </button>
+                    <button
+                        v-if="update && form.event_id !== null"
+                        v-on:click.prevent="deleteResult()"
+                        class="block mb-4
+                    text-center bg-red-500 text-white text-sm font-bold px-4
+                    py-3 rounded shadow-md hover:no-shadow hover:bg-red-600"
+                    >
+                        <span v-if="!loading.deleteResult"
+                            >Verwijder resultaat</span
+                        >
+                        <span v-else><Loader /></span>
+                    </button>
+                </div>
                 <div
-                    v-if="resultsSaved || failure"
+                    v-if="succeeded || failure"
                     :class="{
                         'alert--failure': failure,
-                        'alert--success': resultsSaved,
+                        'alert--success': succeeded,
                     }"
                     class="flex items-center text-white text-sm font-bold px-4 py-3"
                     role="alert"
@@ -242,15 +256,16 @@ export default {
             loading: {
                 events: false,
                 results: false,
+                deleteResult: false,
             },
-            resultsSaved: false,
+            succeeded: false,
             failure: false,
             matches: this.events,
             responseMessage: '',
             event: {},
             errors: [],
             form: {
-                event_id: 0,
+                event_id: null,
                 ...defaultForm,
             },
         };
@@ -293,6 +308,7 @@ export default {
             }
         },
         updateChanged() {
+            this.form.event_id = null;
             this.loading.events = true;
 
             let url = window.location;
@@ -315,7 +331,7 @@ export default {
         },
         saveResults() {
             this.loading.results = true;
-            this.resultsSaved = false;
+            this.succeeded = false;
             this.failure = false;
 
             let url = '/api/match/result';
@@ -326,7 +342,7 @@ export default {
 
             request
                 .then((response) => {
-                    this.resultsSaved = true;
+                    this.succeeded = true;
                     this.responseMessage = response.data.message;
                 })
                 .catch((failure) => {
@@ -337,6 +353,34 @@ export default {
                 })
                 .then(() => {
                     this.loading.results = false;
+                });
+        },
+        deleteResult() {
+            this.loading.deleteResult = true;
+            this.succeeded = false;
+            this.failure = false;
+
+            let url = `api/match/results/${this.form.event_id}`;
+
+            this.$axios
+                .delete(url)
+                .then((response) => {
+                    this.succeeded = true;
+                    this.responseMessage = response.data.message;
+
+                    this.matches = this.matches.filter((match) => {
+                        return match.id !== this.form.event_id;
+                    });
+
+                    this.form = { event_id: null, ...defaultForm };
+                })
+                .catch((failure) => {
+                    this.failure = true;
+                    this.loading.deleteResult = false;
+                    this.responseMessage = failure.data.message;
+                })
+                .then(() => {
+                    this.loading.deleteResult = false;
                 });
         },
     },

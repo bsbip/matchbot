@@ -36,4 +36,5 @@ Route::group(['prefix' => 'slack'], function () {
 Route::post('/match/result', [MatchController::class, 'saveResult']);
 Route::put('/match/result', [MatchController::class, 'saveResult']);
 Route::post('/match', [MatchController::class, 'createCustom']);
-Route::put('/players/{playerId}', PlayerController::class);
+Route::put('/players/{playerId}', [PlayerController::class, 'updateOrCreate']);
+Route::delete('match/results/{event}', [MatchController::class, 'deleteResult']);

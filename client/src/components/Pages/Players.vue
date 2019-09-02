@@ -35,7 +35,6 @@
                                 @change="changeDefault(player)"
                             />
                         </td>
-                        <TableColumn :value="player.default ? 'Ja' : 'nee'" />
                     </tr>
                 </tbody>
             </table>

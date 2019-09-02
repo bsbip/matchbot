@@ -21,7 +21,7 @@ class PlayerController extends Controller
      *
      * @author Ramon Bakker <ramonbakker@rambit.nl>
      */
-    public function __invoke(Request $request, string $playerId): JsonResponse
+    public function updateOrCreate(Request $request, string $playerId): JsonResponse
     {
         $player = Player::where('user_id', $playerId)->first();
 
