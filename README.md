@@ -42,6 +42,8 @@ Run the following commands
 ## Client
 
 - cd into client folder
+- Setup your base url in client/.env
+- Run `npm install`
 - Run `npm run build`
 
 ## Slack

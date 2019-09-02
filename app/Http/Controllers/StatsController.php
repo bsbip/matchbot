@@ -228,7 +228,7 @@ class StatsController extends Controller
      *
      * @author Sander van Ooijen
      */
-    public function getDuoStats(Request $request, string $period = '', string $sort = 'winlose'): InertiaResponse
+    public function getDuoStats(Request $request): InertiaResponse
     {
         $period = $request->query('period', '');
         $sort = $request->query('orderBy', 'winlose');

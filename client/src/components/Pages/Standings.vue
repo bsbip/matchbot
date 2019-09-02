@@ -145,7 +145,9 @@ export default {
         },
     },
     mounted: function() {
-        this.selectedOrderOption = this.orderOptions[0];
+        this.selectedOrderOption = this.orderOptions.find(
+            (orderOption) => orderOption.code === 'winlose',
+        );
         this.selectedPeriod = this.periods.find(
             (period) => period.code === 'all-time',
         );
