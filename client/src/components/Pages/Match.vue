@@ -169,7 +169,10 @@ export default {
             let url = '/api/match';
 
             this.$axios
-                .post(url, { users: this.selectedPlayers })
+                .post(url, {
+                    users: this.selectedPlayers,
+                    random: this.matchType === 'random',
+                })
                 .then((response) => {
                     this.matchCreated = true;
                     this.responseMessage = response.data.message;

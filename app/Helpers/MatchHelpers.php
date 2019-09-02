@@ -47,7 +47,7 @@ function createMatch(array $activeUsers, bool $random = true, $eventInitiation =
         sendSlackResponse($data, env('SLACK_WEBHOOK_URL'));
 
         return new JsonResponse([
-            'msg' => $data['text'],
+            'message' => $data['text'],
             'errors' => new \StdClass(),
         ]);
     } else {
@@ -75,7 +75,7 @@ function createMatch(array $activeUsers, bool $random = true, $eventInitiation =
             sendSlackResponse($data, env('SLACK_WEBHOOK_URL'));
 
             return new JsonResponse([
-                'msg' => $data['text'],
+                'message' => $data['text'],
                 'errors' => new \StdClass(),
             ]);
         }
@@ -99,7 +99,7 @@ function createMatch(array $activeUsers, bool $random = true, $eventInitiation =
             sendSlackResponse($data, env('SLACK_WEBHOOK_URL'));
 
             return new JsonResponse([
-                'msg' => $data['text'],
+                'message' => $data['text'],
                 'errors' => new \StdClass(),
             ]);
         }
@@ -168,7 +168,7 @@ function createMatch(array $activeUsers, bool $random = true, $eventInitiation =
                     sendSlackResponse($data, env('SLACK_WEBHOOK_URL'));
 
                     return new JsonResponse([
-                        'msg' => $data['text'],
+                        'message' => $data['text'],
                         'errors' => new \StdClass(),
                     ]);
                 }
@@ -183,7 +183,7 @@ function createMatch(array $activeUsers, bool $random = true, $eventInitiation =
                 sendSlackResponse($data, env('SLACK_WEBHOOK_URL'));
 
                 return new JsonResponse([
-                    'msg' => $data['text'],
+                    'message' => $data['text'],
                     'errors' => new \StdClass(),
                 ]);
             }
@@ -209,7 +209,7 @@ function createMatch(array $activeUsers, bool $random = true, $eventInitiation =
                     sendSlackResponse($data, env('SLACK_WEBHOOK_URL'));
 
                     return new JsonResponse([
-                        'msg' => $data['text'],
+                        'message' => $data['text'],
                         'errors' => new \StdClass(),
                     ]);
                 }
@@ -231,7 +231,7 @@ function createMatch(array $activeUsers, bool $random = true, $eventInitiation =
                     sendSlackResponse($data, env('SLACK_WEBHOOK_URL'));
 
                     return new JsonResponse([
-                        'msg' => $data['text'],
+                        'message' => $data['text'],
                         'errors' => new \StdClass(),
                     ]);
                 }
@@ -245,7 +245,7 @@ function createMatch(array $activeUsers, bool $random = true, $eventInitiation =
             sendSlackResponse($data, env('SLACK_WEBHOOK_URL'));
 
             return new JsonResponse([
-                'msg' => $data['text'],
+                'message' => $data['text'],
                 'errors' => new \StdClass(),
             ]);
         }
@@ -261,7 +261,7 @@ function createMatch(array $activeUsers, bool $random = true, $eventInitiation =
             sendSlackResponse($data, env('SLACK_WEBHOOK_URL'));
 
             return new JsonResponse([
-                'msg' => $data['text'],
+                'message' => $data['text'],
                 'errors' => new \StdClass(),
             ]);
         }

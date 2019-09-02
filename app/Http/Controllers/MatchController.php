@@ -140,7 +140,7 @@ class MatchController extends Controller
     {
         $users = json_decode(json_encode($request->input('users')));
 
-        return createMatch($users, false);
+        return createMatch($users, (bool) $request->input('random'));
     }
 
     /**

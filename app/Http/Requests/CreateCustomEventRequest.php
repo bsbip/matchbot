@@ -30,11 +30,15 @@ class CreateCustomEventRequest extends FormRequest
         return [
             'users' => [
                 'array',
-                "size:{$minUsers}",
+                "min:{$minUsers}",
             ],
             'users.*.id' => [
                 'required',
                 'distinct',
+            ],
+            'random' => [
+                'required',
+                'boolean',
             ],
         ];
     }
