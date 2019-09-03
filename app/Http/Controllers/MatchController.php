@@ -2,28 +2,28 @@
 
 namespace App\Http\Controllers;
 
+use DB;
 use App\Event;
-use App\EventTeam;
-use App\Http\Requests\CreateCustomEventRequest;
-use App\Http\Requests\UpdateEventRequest;
-use App\Jobs\CalculatePoints;
-use App\Jobs\CreateMatch;
-use App\Jobs\InitiateMatch;
+use Exception;
 use App\Player;
 use App\Result;
-use App\Support\PeriodSupport;
+use App\EventTeam;
 use Carbon\Carbon;
-use DB;
-use Exception;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\PaginatedResourceResponse;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 use Inertia\Inertia;
+use App\Jobs\CreateMatch;
+use App\Jobs\InitiateMatch;
+use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use App\Jobs\CalculatePoints;
+use App\Support\PeriodSupport;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 use Inertia\Response as InertiaResponse;
+use App\Http\Requests\UpdateEventRequest;
+use Illuminate\Database\Eloquent\Collection;
 use Symfony\Component\HttpFoundation\Response;
+use App\Http\Requests\CreateCustomEventRequest;
+use Illuminate\Http\Resources\Json\PaginatedResourceResponse;
 
 /**
  * Actions for matches
@@ -145,6 +145,8 @@ class MatchController extends Controller
 
     /**
      * Get the user list.
+     *
+     * @param Request $request
      *
      * @return JsonResponse|InertiaResponse
      *
@@ -309,8 +311,7 @@ class MatchController extends Controller
     /**
      * Get events with results and teams.
      *
-     * @param int $page
-     * @param int $limit
+     * @param Request $request
      *
      * @return JsonResponse|InertiaResponse
      *
@@ -391,8 +392,7 @@ class MatchController extends Controller
     /**
      * Get events.
      *
-     * @param string $statusType event status type
-     * @param bool $limit true to limit
+     * @param Request $request
      *
      * @return JsonResponse|InertiaResponse
      *
@@ -402,7 +402,6 @@ class MatchController extends Controller
     public function getEvents(Request $request)
     {
         $statusType = $request->query('statusType', 'without-results');
-        $limited = $request->has('limited');
 
         $events = Event::query()
             ->when($statusType === 'with-results', function ($query) {
@@ -411,7 +410,7 @@ class MatchController extends Controller
             ->when($statusType === 'without-results', function ($query) {
                 $query->where('status', 0);
             })
-            ->when($limited, function ($query) {
+            ->when($request->has('limited'), function ($query) {
                 $period = PeriodSupport::lastSevenDays();
                 $query->whereBetween('events.created_at', [
                     $period->from,
@@ -426,7 +425,7 @@ class MatchController extends Controller
                     ]);
                 },
             ])
-            ->orderByDesc('start')
+            ->orderBy('start', 'desc')
             ->get();
 
         $data = [
@@ -443,8 +442,7 @@ class MatchController extends Controller
     /**
      * Save the result of a match.
      *
-     * @param Request $request
-     * @param mixed $update true to update result
+     * @param UpdateEventRequest $request
      *
      * @return JsonResponse
      *
@@ -484,11 +482,7 @@ class MatchController extends Controller
 
         foreach ($eventTeams as $key => $eventTeam) {
 
-            $teamResults = $request->get('teams')[0];
-
-            if ($key === 1) {
-                $teamResults = $request->get('teams')[1];
-            }
+            $teamResults = $request->get('teams')[$key];
 
             Result::updateOrCreate([
                 'team_id' => $eventTeam->team_id,
@@ -544,7 +538,7 @@ class MatchController extends Controller
      * Delete the result of a match.
      * Performs a soft delete.
      *
-     * @param Event $event
+     * @param int $eventId
      *
      * @return JsonResponse
      *
@@ -564,7 +558,7 @@ class MatchController extends Controller
             'deleted' => true,
         ]);
 
-        if ($resultsUpdated > 0) {
+        if ($resultsUpdated) {
             $event->update([
                 'status' => false,
             ]);

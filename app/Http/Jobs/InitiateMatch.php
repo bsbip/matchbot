@@ -59,7 +59,6 @@ class InitiateMatch implements ShouldQueue
         }
 
         if (isset($this->input['user_id'])) {
-
             $user = getSlackUser($this->input['user_id']);
             $usersChosenText = ":heavy_check_mark: {$user->profile->real_name}";
             $potentialPlayersAmount = 1;

@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "rm -rf '../public/js' && rm -rf '../public/css' && rm -rf '../public/img' && rm -rf '../public/assets' && vue-cli-service build --no-clean",
+    "build": "rm -rf '../public/js' '../public/css' '../public/img' '../public/assets' && vue-cli-service build --no-clean",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
