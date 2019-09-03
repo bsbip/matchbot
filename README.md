@@ -24,7 +24,7 @@ Clone the repository by using the convential methods and follow the following st
 
 ### Requirements
 
-You will need a server that can run Laravel. For server requirements, see: <a href="https://laravel.com/docs/5.8/installation#server-requirements">Server requirements</a>
+You will need a server that can run Laravel. For server requirements, see: <a href="https://laravel.com/docs/5.8/installation#server-requirements">Server requirements</a>. Matchbot requires PHP >= 7.2.
 
 ### Laravel
 
