@@ -3,13 +3,13 @@
 namespace App\Jobs;
 
 use App\Event;
-use App\EventTeam;
 use App\Player;
+use App\EventTeam;
 use Illuminate\Bus\Queueable;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
 
 class CalculatePoints implements ShouldQueue
 {
@@ -26,6 +26,8 @@ class CalculatePoints implements ShouldQueue
      * Execute the console command.
      *
      * @return void
+     *
+     * @author unknown
      */
     public function handle(): void
     {
@@ -61,6 +63,8 @@ class CalculatePoints implements ShouldQueue
      * @param  Event $match
      *
      * @return void
+     *
+     * @author unknown
      */
     public function calculatePoints(Event $match): void
     {
@@ -88,6 +92,8 @@ class CalculatePoints implements ShouldQueue
      * @param  EventTeam $team
      *
      * @return int
+     *
+     * @author unknown
      */
     public function calculatePointsForTeam(EventTeam $team): int
     {
@@ -105,6 +111,8 @@ class CalculatePoints implements ShouldQueue
      * @param  float $fairnessCorrection
      *
      * @return EventTeam
+     *
+     * @author unknown
      */
     public function setPointsPerTeam(EventTeam $team, int $highestPoints, int $basePoints, float $fairnessCorrection): EventTeam
     {
@@ -149,20 +157,23 @@ class CalculatePoints implements ShouldQueue
      * @param  EventTeam $team
      *
      * @return float
+     *
+     * @author unknown
+     * @author Ramon Bakker <ramonbakker@rambit.nl>
      */
     public function setPointsPerPlayer(Player $player, EventTeam $team): float
     {
         if ($team->points === 0) {
             $percentage = 0.50;
         } else {
-            $percentage = ($player->points / $team->points);
+            $percentage = $player->points / $team->points;
         }
 
         if ($team->win) {
-            $percentage = (1 - $percentage);
+            $percentage = 1 - $percentage;
         }
 
-        return round(($team->pointsAcquired * $percentage));
+        return round($team->pointsAcquired * $percentage);
     }
 
     /**
@@ -172,6 +183,8 @@ class CalculatePoints implements ShouldQueue
      * @param  EventTeam $opponent
      *
      * @return bool
+     *
+     * @author unknown
      */
     public function isWinner(EventTeam $team, EventTeam $opponent): bool
     {

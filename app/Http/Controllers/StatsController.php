@@ -73,11 +73,9 @@ class StatsController extends Controller
     /**
      * Get total stats.
      *
-     * @param string $period
-     * @param string $orderBy order results by the specified field
-     * @param string $orderDirection the order direction
+     * @param Request $request
      *
-     * @return JsonResponse
+     * @return InertiaResponse
      *
      * @author Ramon Bakker <ramonbakker@rambit.nl>
      */
