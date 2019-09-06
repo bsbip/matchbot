@@ -17,6 +17,6 @@ use App\Http\Controllers\StatsController;
 Route::get('/', [MatchController::class, 'getEventResults']);
 Route::get('/stats', [StatsController::class, 'getTotalStats']);
 Route::get('/standings', [StatsController::class, 'getDuoStats']);
-Route::get('/match', [MatchController::class, 'getUserList'])->name('match');
-Route::get('/players', [MatchController::class, 'getUserList'])->name('players');
+Route::get('/match', [MatchController::class, 'matchUsers']);
+Route::get('/players', [MatchController::class, 'getUserList']);
 Route::get('/results', [MatchController::class, 'getEvents']);

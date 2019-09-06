@@ -74,7 +74,7 @@
                 </thead>
                 <tbody>
                     <tr
-                        class="hover:bg-gray-300"
+                        class="hover:bg-gray-300 border-b border-gray-300"
                         v-for="(statistic, index) of data"
                         v-bind:key="statistic.id"
                     >

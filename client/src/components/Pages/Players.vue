@@ -17,10 +17,10 @@
                     <tr
                         v-for="player in players"
                         v-bind:key="player.id"
-                        class="hover:bg-gray-300"
+                        class="hover:bg-gray-300 border-b border-gray-300"
                     >
                         <td
-                            class="flex flex-row content-start items-center py-2 px-3 border-b border-gray-300 text-sm"
+                            class="flex flex-row content-start items-center py-2 px-3 text-sm"
                         >
                             <img
                                 :src="player.profile.image_32"
@@ -29,7 +29,7 @@
                             />
                             {{ player.real_name }} @{{ player.name }}
                         </td>
-                        <td class="py-2 px-3 border-b border-gray-300 text-sm">
+                        <td class="py-2 px-3 text-sm">
                             <Toggle
                                 :value="player.default"
                                 @change="changeDefault(player)"

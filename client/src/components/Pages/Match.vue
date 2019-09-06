@@ -44,7 +44,7 @@
                     </thead>
                     <tbody>
                         <tr
-                            class="cursor-pointer"
+                            class="cursor-pointer border-b border-gray-300"
                             :class="{
                                 selected: selectedPlayers.includes(player),
                             }"
@@ -53,7 +53,7 @@
                             @click="toggleSelected(player)"
                         >
                             <td
-                                class="flex flex-row content-start items-center py-2 px-3 border-b border-gray-300 text-sm"
+                                class="flex flex-row content-start items-center py-2 px-3 text-sm"
                             >
                                 <img
                                     :src="player.profile.image_32"
@@ -69,19 +69,20 @@
                     </tbody>
                 </table>
             </div>
-            <div v-else class="flex flex-col">
+            <div v-else class="flex flex-row flex-wrap">
                 <div
-                    class="mb-4"
+                    class="mb-4 w-full md:w-1/2 p-4"
                     v-bind:key="index"
                     v-for="(selectedPlayer, index) in selectedPlayers"
                 >
                     <label class="block text-gray-700 text-sm font-bold mb-2">
-                        <span v-if="index <= 1">
-                            {{ `Team 1: speler ${index + 1}` }}
+                        <span v-if="index === 0">
+                            {{ `Team 1` }}
                         </span>
-                        <span v-else>
-                            {{ `Team 2: speler ${index + 1}` }}
+                        <span v-if="index === 2">
+                            {{ `Team 2` }}
                         </span>
+                        <span v-else></span>
                     </label>
                     <select
                         v-model="selectedPlayers[index]"

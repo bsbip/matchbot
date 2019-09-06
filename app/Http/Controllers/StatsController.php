@@ -78,6 +78,7 @@ class StatsController extends Controller
      * @return InertiaResponse
      *
      * @author Ramon Bakker <ramonbakker@rambit.nl>
+     * @author Roy Freij <info@royfreij.nl>
      */
     public function getTotalStats(Request $request): InertiaResponse
     {
@@ -225,6 +226,8 @@ class StatsController extends Controller
      * @return JsonResponse
      *
      * @author Sander van Ooijen
+     * @author Roy Freij <info@royfreij.nl>
+     * @version 1.0.0
      */
     public function getDuoStats(Request $request): InertiaResponse
     {

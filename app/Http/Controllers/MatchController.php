@@ -2,34 +2,53 @@
 
 namespace App\Http\Controllers;
 
-use DB;
 use App\Event;
-use Exception;
-use App\Player;
-use App\Result;
 use App\EventTeam;
-use Carbon\Carbon;
-use Inertia\Inertia;
+use App\Http\Requests\CreateCustomEventRequest;
+use App\Http\Requests\UpdateEventRequest;
+use App\Jobs\CalculatePoints;
 use App\Jobs\CreateMatch;
 use App\Jobs\InitiateMatch;
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
-use App\Jobs\CalculatePoints;
+use App\Player;
+use App\Repositories\PlayerRepository;
+use App\Result;
 use App\Support\PeriodSupport;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Log;
-use Inertia\Response as InertiaResponse;
-use App\Http\Requests\UpdateEventRequest;
+use Carbon\Carbon;
+use DB;
+use Exception;
 use Illuminate\Database\Eloquent\Collection;
-use Symfony\Component\HttpFoundation\Response;
-use App\Http\Requests\CreateCustomEventRequest;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\PaginatedResourceResponse;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use Inertia\Inertia;
+use Inertia\Response as InertiaResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Actions for matches
  */
 class MatchController extends Controller
 {
+    /**
+     * @var PlayerRepository
+     */
+    protected $playerRepository;
+
+    /**
+     * Create a new instnace of MatchController
+     *
+     * @param PlayerRepository $playerRepository
+     *
+     * @author Roy Freij <info@royfreij.nl>
+     * @version 1.0.0
+     */
+    public function __construct(PlayerRepository $playerRepository)
+    {
+        $this->playerRepository = $playerRepository;
+    }
+
     /**
      * Initiate a match.
      *
@@ -155,42 +174,42 @@ class MatchController extends Controller
      */
     public function getUserList(Request $request)
     {
-        $data = [];
-        $players = Player::where('default', true)
-            ->pluck('user_id')
-            ->toArray();
-
-        $users = getSlackUserList(env('SLACK_TOKEN'));
-
-        foreach ($users as $user) {
-            // Filter: only get users (no bots and not deleted)
-            if (
-                $user->id !== 'USLACKBOT' &&
-                (isset($user->is_bot) && !$user->is_bot) &&
-                (isset($user->deleted) && !$user->deleted)
-            ) {
-                $data[] = $user;
-            }
-
-            $user->default = array_search($user->id, $players) !== false;
-        }
+        $players = $this->playerRepository->all();
 
         if (Str::contains($request->header('Accept'), 'application/json')) {
             return new JsonResponse([
-                $data,
+                $players,
             ]);
         }
 
-        $component = 'Match';
+        return Inertia::render('Players', [
+            'data' => $players->values(),
+        ]);
+    }
 
-        if ($request->routeIs('players')) {
-            $component = 'Players';
+    /**
+     * Get the user list for matches
+     *
+     * @param Request $request
+     *
+     * @return JsonResponse|InertiaResponse
+     *
+     * @author Ramon Bakker <ramonbakker@rambit.nl>
+     * @author Roy Freij <info@royfreij.nl>
+     */
+    public function matchUsers(Request $request)
+    {
+        $players = $this->playerRepository->all();
+
+        if (Str::contains($request->header('Accept'), 'application/json')) {
+            return new JsonResponse([
+                $players,
+            ]);
         }
 
-        return Inertia::render($component, [
-            'data' => $data,
+        return Inertia::render('Match', [
+            'data' => $players->values(),
         ]);
-
     }
 
     /**
@@ -477,7 +496,6 @@ class MatchController extends Controller
         }
 
         $eventTeams = EventTeam::where('event_teams.event_id', $matchId)
-            ->orderBy('id')
             ->get();
 
         foreach ($eventTeams as $key => $eventTeam) {
@@ -551,14 +569,14 @@ class MatchController extends Controller
 
         DB::beginTransaction();
 
-        $resultsUpdated = Result::where([
+        $amountOfResultsUpdated = Result::where([
             'event_id' => $event->id,
             'deleted' => false,
         ])->update([
             'deleted' => true,
         ]);
 
-        if ($resultsUpdated) {
+        if ($amountOfResultsUpdated > 0) {
             $event->update([
                 'status' => false,
             ]);
