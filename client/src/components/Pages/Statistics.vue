@@ -78,16 +78,15 @@
                         v-for="(statistic, index) of data"
                         v-bind:key="statistic.id"
                     >
-                        <TableColumn :value="index + 1" />
+                        <TableColumn>{{ index + 1 }}</TableColumn>
                         <TableColumn
                             v-for="field in fields"
                             v-bind:key="field.text"
-                            :field="field.property"
-                            :value="
+                            >{{
                                 `${statistic[field.property]}${field.addition ||
                                     ''}`
-                            "
-                        />
+                            }}</TableColumn
+                        >
                     </tr>
                 </tbody>
             </table>

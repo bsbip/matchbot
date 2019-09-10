@@ -52,19 +52,21 @@
                             v-bind:key="player.id"
                             @click="toggleSelected(player)"
                         >
-                            <td
-                                class="flex flex-row content-start items-center py-2 px-3 text-sm"
-                            >
-                                <img
-                                    :src="player.profile.image_32"
-                                    class="mr-4"
-                                    alt="speler"
-                                />
-                                {{ player.real_name }} @{{ player.name }}
-                            </td>
-                            <TableColumn
-                                :value="player.default ? 'Ja' : 'nee'"
-                            />
+                            <TableColumn>
+                                <div
+                                    class="flex flex-row content-start items-center"
+                                >
+                                    <img
+                                        :src="player.profile.image_32"
+                                        class="mr-4"
+                                        alt="speler"
+                                    />
+                                    {{ player.real_name }} @{{ player.name }}
+                                </div>
+                            </TableColumn>
+                            <TableColumn>
+                                {{ player.default ? 'Ja' : 'nee' }}
+                            </TableColumn>
                         </tr>
                     </tbody>
                 </table>

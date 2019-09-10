@@ -19,22 +19,24 @@
                         v-bind:key="player.id"
                         class="hover:bg-gray-300 border-b border-gray-300"
                     >
-                        <td
-                            class="flex flex-row content-start items-center py-2 px-3 text-sm"
-                        >
-                            <img
-                                :src="player.profile.image_32"
-                                class="mr-4"
-                                alt="speler"
-                            />
-                            {{ player.real_name }} @{{ player.name }}
-                        </td>
-                        <td class="py-2 px-3 text-sm">
+                        <TableColumn>
+                            <div
+                                class="flex flex-row content-start items-center"
+                            >
+                                <img
+                                    :src="player.profile.image_32"
+                                    class="mr-4"
+                                    alt="speler"
+                                />
+                                {{ player.real_name }} @{{ player.name }}
+                            </div>
+                        </TableColumn>
+                        <TableColumn>
                             <Toggle
                                 :value="player.default"
                                 @change="changeDefault(player)"
                             />
-                        </td>
+                        </TableColumn>
                     </tr>
                 </tbody>
             </table>
@@ -47,6 +49,7 @@ import Layout from '@shared/Layout.vue';
 import Card from '@shared/Card.vue';
 import Toggle from '@shared/Form/Toggle.vue';
 import TableHeader from '@shared/Table/TableHeader.vue';
+import TableColumn from '@shared/Table/TableColumn.vue';
 
 export default {
     name: 'Players',
@@ -55,6 +58,7 @@ export default {
         Card,
         Toggle,
         TableHeader,
+        TableColumn,
     },
     props: {
         data: Array,

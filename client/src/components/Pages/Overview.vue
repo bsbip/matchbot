@@ -21,23 +21,37 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="match in matches" v-bind:key="match.id">
-                        <TableColumn :value="match.id" />
-                        <TableColumn :value="match.name" />
-                        <TableColumn :value="match.start | date" />
-                        <TableColumn :value="match.results[0].team.name" />
-                        <TableColumn :value="match.results[1].team.name" />
-                        <TableColumn
-                            :value="
+                    <tr
+                        v-for="match in matches"
+                        v-bind:key="match.id"
+                        class="hover:bg-gray-300 border-b border-gray-300"
+                    >
+                        <TableColumn>
+                            {{ match.id }}
+                        </TableColumn>
+                        <TableColumn>
+                            {{ match.name }}
+                        </TableColumn>
+                        <TableColumn>
+                            {{ match.start | date }}
+                        </TableColumn>
+                        <TableColumn>
+                            {{ match.results[0].team.name }}
+                        </TableColumn>
+                        <TableColumn>
+                            {{ match.results[1].team.name }}
+                        </TableColumn>
+                        <TableColumn>
+                            {{
                                 `${match.results[0].score}-${match.results[1].score}`
-                            "
-                        />
-                        <TableColumn
-                            :value="
+                            }}
+                        </TableColumn>
+                        <TableColumn>
+                            {{
                                 `${match.results[0].crawl_score}-${match.results[1].crawl_score}`
-                            "
-                        />
-                        <TableColumn :value="match.results[0].note" />
+                            }}
+                        </TableColumn>
+                        <TableColumn>{{ match.results[0].note }}</TableColumn>
                     </tr>
                 </tbody>
             </table>

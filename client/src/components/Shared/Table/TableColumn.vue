@@ -1,13 +1,9 @@
 <template>
     <td class="py-2 px-3 text-sm">
-        {{ value }}
+        <slot />
     </td>
 </template>
 
 <script>
-export default {
-    props: {
-        value: String,
-    },
-};
+export default {};
 </script>
