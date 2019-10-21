@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+
+.active {
+    @apply font-bold;
+}
+
+.alert--success, .selected {
+    @apply bg-green-400;
+}
+
+.alert--failure {
+    @apply bg-red-400;
+}
+
+.has-errors {
+    @apply border-red-500;
+}
+
+.toggle-active {
+    @apply bg-green-400 justify-end;
+}
+
+.toggle-inactive {
+    @apply justify-start bg-red-400;
+}
+
+.input {
+    @apply shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight;
+}
+
+.select {
+    @apply block appearance-none w-full bg-white border border-gray-400 px-4 py-2 pr-8 rounded shadow leading-tight;
+}
+
+@tailwind utilities;
