@@ -41,61 +41,61 @@ export default {
     ],
     periods: [
         {
-            name: 'Vandaag',
+            text: 'Vandaag',
             code: 'today',
         },
         {
-            name: 'Gisteren',
+            text: 'Gisteren',
             code: 'yesterday',
         },
         {
-            name: 'Huidige week',
+            text: 'Huidige week',
             code: 'current-week',
         },
         {
-            name: '7 dagen',
+            text: '7 dagen',
             code: 'last-seven-days',
         },
         {
-            name: 'Huidige maand',
+            text: 'Huidige maand',
             code: 'current-month',
         },
         {
-            name: 'Geheel',
+            text: 'Geheel',
             code: 'all-time',
         },
     ],
     orderOptions: [
         {
-            name: 'Matches',
+            text: 'Matches',
             code: 'totalgames',
         },
         {
-            name: 'Gewonnen',
+            text: 'Gewonnen',
             code: 'won',
         },
         {
-            name: 'Verloren',
+            text: 'Verloren',
             code: 'lost',
         },
         {
-            name: 'Win/verlies ratio',
+            text: 'Win/verlies ratio',
             code: 'winlose',
         },
         {
-            name: 'Gemiddelde teamscore',
+            text: 'Gemiddelde teamscore',
             code: 'avgscore',
         },
         {
-            name: 'Teamscore',
+            text: 'Teamscore',
             code: 'totalscore',
         },
         {
-            name: 'Gemiddelde kruipscore',
+            text: 'Gemiddelde kruipscore',
             code: 'avgcrawlscore',
         },
         {
-            name: 'Kruipscore',
+            text: 'Kruipscore',
             code: 'crawlscore',
         },
     ],

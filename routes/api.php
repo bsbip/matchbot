@@ -20,16 +20,22 @@ Route::group(['prefix' => 'slack'], function () {
     Route::group([
         'middleware' => 'auth.signature.slack',
     ], function () {
-        Route::post('/match', [MatchController::class, 'create']);
-        Route::post('/match/result', [MatchController::class, 'saveResultSlack']);
+        Route::group(['prefix' => 'match'], function () {
+            Route::post('/', [MatchController::class, 'create']);
+            Route::post('/result', [MatchController::class, 'saveResultSlack']);
+            Route::post('/initiate', [MatchController::class, 'initiate']);
+        });
+
         Route::get('/stats', [StatsController::class, 'getResult']);
-        Route::post('/match/initiate', [MatchController::class, 'initiate']);
         Route::post('/interaction', [InteractionController::class, 'handle']);
     });
 });
 
-Route::post('/match/result', [MatchController::class, 'saveResult']);
-Route::put('/match/result', [MatchController::class, 'saveResult']);
-Route::post('/match', [MatchController::class, 'createCustom']);
+Route::group(['prefix' => 'match'], function () {
+    Route::post('/', [MatchController::class, 'createCustom']);
+    Route::put('/result', [MatchController::class, 'saveResult']);
+    Route::post('/result', [MatchController::class, 'saveResult']);
+    Route::delete('/results/{event}', [MatchController::class, 'deleteResult']);
+});
+
 Route::put('/players/{playerId}', [PlayerController::class, 'updateOrCreate']);
-Route::delete('match/results/{event}', [MatchController::class, 'deleteResult']);

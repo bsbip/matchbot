@@ -8,34 +8,14 @@
             Type match
         </label>
         <div class="inline-block relative w-full mr-8">
-            <select
-                class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
+            <CustomSelect
                 v-model="matchType"
-                @change="matchTypeChanged()"
-            >
-                <option
-                    v-for="(type, index) in types"
-                    v-bind:value="type"
-                    v-bind:key="index"
-                    >{{ type }}</option
-                >
-            </select>
-            <div
-                class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700"
-            >
-                <svg
-                    class="fill-current h-4 w-4"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                >
-                    <path
-                        d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"
-                    />
-                </svg>
-            </div>
+                @input="matchTypeChanged()"
+                :options="types"
+            />
         </div>
         <Card class="px-4 md:px-8 pt-3 md:pt-6 pb-4 md:pb-8">
-            <div v-if="matchType === 'random'">
+            <div v-if="matchType.code === 'random'">
                 <h2 class="text-x1 block mb-4">Potentiële spelers kiezen</h2>
                 <table class="text-left w-full border-collapse mb-4">
                     <thead>
@@ -86,18 +66,12 @@
                         </span>
                         <span v-else></span>
                     </label>
-                    <select
+                    <CustomSelect
                         v-model="selectedPlayers[index]"
-                        class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
-                    >
-                        <option :value="{}">Kies speler</option>
-                        <option
-                            v-for="player in players"
-                            v-bind:key="player.id"
-                            :value="player"
-                            >{{ player.real_name }} (@ {{ player.name }})
-                        </option></select
-                    >
+                        :options="players"
+                        defaultOption="Kies een speler"
+                        :customText="customText"
+                    />
                 </div>
             </div>
             <button
@@ -129,6 +103,7 @@ import Card from '@shared/Card.vue';
 import TableHeader from '@shared/Table/TableHeader.vue';
 import TableColumn from '@shared/Table/TableColumn.vue';
 import Loader from '@shared/Loader.vue';
+import CustomSelect from '@shared/Form/CustomSelect.vue';
 
 export default {
     name: 'Match',
@@ -138,6 +113,7 @@ export default {
         TableHeader,
         TableColumn,
         Loader,
+        CustomSelect,
     },
     props: {
         data: Array,
@@ -150,8 +126,20 @@ export default {
             failure: false,
             responseMessage: '',
             selectedPlayers: [],
-            matchType: 'random',
-            types: ['random', 'custom'],
+            matchType: {
+                code: 'random',
+            },
+            types: [
+                {
+                    code: 'random',
+                    text: 'random',
+                },
+                {
+                    code: 'custom',
+                    text: 'custom',
+                },
+            ],
+            apiUrl: process.env.VUE_APP_API_URL,
         };
     },
     methods: {
@@ -164,17 +152,20 @@ export default {
                 this.selectedPlayers = [...this.selectedPlayers, player];
             }
         },
+        customText(player) {
+            return `${player.real_name} (@ ${player.name})`;
+        },
         createMatch() {
             this.loading = true;
             this.matchCreated = false;
             this.failure = false;
 
-            let url = '/api/match';
+            let url = `${this.apiUrl}match`;
 
             this.$axios
                 .post(url, {
                     users: this.selectedPlayers,
-                    random: this.matchType === 'random',
+                    random: this.matchType.code === 'random',
                 })
                 .then((response) => {
                     this.matchCreated = true;
@@ -190,13 +181,13 @@ export default {
                 });
         },
         matchTypeChanged() {
-            if (this.matchType === 'random') {
+            if (this.matchType.code === 'random') {
                 this.selectedPlayers = this.players.filter(
                     (player) => player.default,
                 );
             }
 
-            if (this.matchType === 'custom') {
+            if (this.matchType.code === 'custom') {
                 this.selectedPlayers = [{}, {}, {}, {}];
             }
         },

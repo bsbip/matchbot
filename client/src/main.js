@@ -12,6 +12,10 @@ Vue.config.productionTip = true;
 
 Vue.prototype.$toastService = new ToastService();
 
+Vue.filter('formatDate', function(value) {
+    return new Date(value).toLocaleString('nl-NL');
+});
+
 new Vue({
     render: (h) =>
         h(InertiaApp, {

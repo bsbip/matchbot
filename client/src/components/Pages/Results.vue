@@ -19,26 +19,14 @@
                     >
                         Wedstrijd
                     </label>
-                    <select
+                    <CustomSelect
                         id="match"
                         v-model="event"
-                        @change="eventChanged()"
-                        class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline mb-4"
+                        @input="eventChanged()"
+                        :options="matches"
                         v-if="!loading.events && matches.length > 0"
-                    >
-                        <option
-                            v-for="event in matches"
-                            v-bind:key="event.id"
-                            :value="event"
-                            >{{
-                                `${event.id}. ${event.name} (${new Date(
-                                    event.start,
-                                ).toLocaleString('nl-NL')}): ${
-                                    event.event_teams[0].team.name
-                                } - ${event.event_teams[1].team.name}`
-                            }}</option
-                        >
-                    </select>
+                        :customText="customText"
+                    />
                     <Alert
                         v-if="!loading.events && matches.length === 0"
                         class="mb-4"
@@ -71,7 +59,7 @@
                                     'has-errors':
                                         errors['teams.0.score'] !== undefined,
                                 }"
-                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                class="input focus:outline-none focus:shadow-outline"
                                 id="team_one_score"
                                 type="number"
                                 placeholder="0"
@@ -97,7 +85,7 @@
                                         errors['teams.0.crawl_score'] !==
                                         undefined,
                                 }"
-                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                class="input focus:outline-none focus:shadow-outline"
                                 id="team_one_crawl_score"
                                 type="number"
                                 placeholder="0"
@@ -125,7 +113,7 @@
                                     'has-errors':
                                         errors['teams.1.score'] !== undefined,
                                 }"
-                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                class="input focus:outline-none focus:shadow-outline"
                                 id="team_two_score"
                                 type="number"
                                 placeholder="0"
@@ -151,7 +139,7 @@
                                         errors['teams.1.crawl_score'] !==
                                         undefined,
                                 }"
-                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                class="input focus:outline-none focus:shadow-outline"
                                 id="team_two_crawl_score"
                                 type="number"
                                 placeholder="0"
@@ -174,7 +162,7 @@
                         Note
                     </label>
                     <textarea
-                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        class="input focus:outline-none focus:shadow-outline"
                         v-model="form.note"
                         id="note"
                     ></textarea>
@@ -223,6 +211,7 @@ import Card from '@shared/Card.vue';
 import Loader from '@shared/Loader.vue';
 import Alert from '@shared/Alert.vue';
 import Toggle from '@shared/Form/Toggle.vue';
+import CustomSelect from '@shared/Form/CustomSelect.vue';
 
 const defaultForm = {
     teams: [
@@ -246,6 +235,7 @@ export default {
         Loader,
         Alert,
         Toggle,
+        CustomSelect,
     },
     props: {
         events: {},
@@ -268,9 +258,22 @@ export default {
                 event_id: null,
                 ...defaultForm,
             },
+            apiUrl: process.env.VUE_APP_API_URL,
         };
     },
+    mounted() {
+        if (this.events) {
+            this.event = this.events[0];
+        }
+    },
     methods: {
+        customText(event) {
+            return `${event.id}. ${event.name} (${new Date(
+                event.start,
+            ).toLocaleString('nl-NL')}): ${event.event_teams[0].team.name} - ${
+                event.event_teams[1].team.name
+            }`;
+        },
         eventChanged() {
             this.form = {
                 ...this.form,
@@ -324,17 +327,24 @@ export default {
                 .get(url)
                 .then((response) => {
                     this.matches = response.data.events;
+                    this.event = this.matches[0];
+                    this.eventChanged();
                 })
                 .then(() => {
                     this.loading.events = false;
                 });
         },
         saveResults() {
+            this.form = {
+                ...this.form,
+                ...{ event_id: this.event.id },
+            };
+
             this.loading.results = true;
             this.succeeded = false;
             this.failure = false;
 
-            let url = '/api/match/result';
+            let url = `${this.apiUrl}match/result`;
 
             let request = this.update
                 ? this.$axios.put(url, this.form)
@@ -360,7 +370,7 @@ export default {
             this.succeeded = false;
             this.failure = false;
 
-            let url = `api/match/results/${this.form.event_id}`;
+            let url = `${this.apiUrl}match/results/${this.form.event_id}`;
 
             this.$axios
                 .delete(url)

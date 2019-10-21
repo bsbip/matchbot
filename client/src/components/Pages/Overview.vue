@@ -33,7 +33,7 @@
                             {{ match.name }}
                         </TableColumn>
                         <TableColumn>
-                            {{ match.start | date }}
+                            {{ match.start | formatDate }}
                         </TableColumn>
                         <TableColumn>
                             {{ match.results[0].team.name }}
@@ -126,11 +126,6 @@ export default {
                 .then(() => {
                     this.loading = false;
                 });
-        },
-    },
-    filters: {
-        date: function(value) {
-            return new Date(value).toLocaleString('nl-NL');
         },
     },
 };

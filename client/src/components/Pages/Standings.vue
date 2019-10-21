@@ -3,58 +3,18 @@
         <h1 class="text-3xl block mb-4">Standen</h1>
         <section class="flex flex-row items-center mb-4">
             <div class="inline-block relative w-64 mr-8">
-                <select
-                    class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
+                <CustomSelect
                     v-model="selectedPeriod"
-                    v-on:change="changeFilter()"
-                >
-                    <option
-                        v-for="period in periods"
-                        v-bind:value="period"
-                        v-bind:key="period.code"
-                        >{{ period.name }}</option
-                    >
-                </select>
-                <div
-                    class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700"
-                >
-                    <svg
-                        class="fill-current h-4 w-4"
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 20 20"
-                    >
-                        <path
-                            d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"
-                        />
-                    </svg>
-                </div>
+                    :options="periods"
+                    @change="changeFilter()"
+                />
             </div>
             <div class="inline-block relative w-64">
-                <select
-                    class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
+                <CustomSelect
                     v-model="selectedOrderOption"
-                    v-on:change="changeFilter()"
-                >
-                    <option
-                        v-for="orderOption in orderOptions"
-                        v-bind:value="orderOption"
-                        v-bind:key="orderOption.code"
-                        >{{ orderOption.name }}</option
-                    >
-                </select>
-                <div
-                    class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700"
-                >
-                    <svg
-                        class="fill-current h-4 w-4"
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 20 20"
-                    >
-                        <path
-                            d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"
-                        />
-                    </svg>
-                </div>
+                    :options="orderOptions"
+                    @change="changeFilter()"
+                />
             </div>
         </section>
         <Card>
@@ -107,6 +67,7 @@ import Layout from '@shared/Layout.vue';
 import TableHeader from '@shared/Table/TableHeader.vue';
 import TableColumn from '@shared/Table/TableColumn.vue';
 import Card from '@shared/Card.vue';
+import CustomSelect from '@shared/Form/CustomSelect.vue';
 
 import standings from '../../config/standings';
 
@@ -119,14 +80,21 @@ export default {
         TableHeader,
         TableColumn,
         Card,
+        CustomSelect,
     },
     props: {
         data: Array,
     },
     data: function() {
         return {
-            selectedOrderOption: {},
-            selectedPeriod: {},
+            selectedOrderOption: {
+                text: '',
+                code: '',
+            },
+            selectedPeriod: {
+                text: '',
+                code: '',
+            },
             orderOptions: standings.orderOptions,
             periods: standings.periods,
             fields: standings.fields,
@@ -135,6 +103,13 @@ export default {
     methods: {
         changeFilter() {
             const url = Inertia.page.url.split('?')[0];
+
+            console.log({
+                data: {
+                    period: this.selectedPeriod.code,
+                    orderBy: this.selectedOrderOption.code,
+                },
+            });
 
             Inertia.visit(url, {
                 data: {

@@ -66,13 +66,14 @@ export default {
     data: function() {
         return {
             players: this.data,
+            apiUrl: process.env.VUE_APP_API_URL,
         };
     },
     methods: {
         changeDefault(player) {
             player.default = !player.default;
 
-            let url = `api/players/${player.id}`;
+            let url = `${this.apiUrl}players/${player.id}`;
 
             this.$axios
                 .put(url, { default: player.default })
