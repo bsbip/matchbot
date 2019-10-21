@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="inline-block relative">
         <select
             class="select focus:outline-none focus:shadow-outline hover:border-gray-500"
             @change="change"
