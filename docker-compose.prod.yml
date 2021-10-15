@@ -18,6 +18,19 @@ services:
     networks:
       - matchbot-network
 
+  redis:
+    image: redis:6-alpine
+    container_name: matchbot-redis
+    restart: unless-stopped
+    tty: true
+    command: redis-server --save 60 1 --loglevel warning --requirepass ${REDIS_PASSWORD}
+    ports:
+      - "4001:6379"
+    volumes:
+      - ./redis:/data
+    networks:
+      - matchbot-network
+
   backend:
     container_name: matchbot-api
     restart: unless-stopped
@@ -28,6 +41,8 @@ services:
       DB_DATABASE: ${MYSQL_DATABASE}
       DB_USER: ${MYSQL_USER}
       DB_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "4002:9000"
     volumes:
       - "./api:/var/www"
     networks:

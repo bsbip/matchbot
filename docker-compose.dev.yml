@@ -18,6 +18,19 @@ services:
     networks:
       - matchbot-network
 
+  redis:
+    image: redis:6-alpine
+    container_name: matchbot-redis
+    restart: unless-stopped
+    tty: true
+    command: redis-server --save 60 1 --loglevel warning --requirepass ${REDIS_PASSWORD}
+    ports:
+      - "4001:6379"
+    volumes:
+      - ./redis:/data
+    networks:
+      - matchbot-network
+
   backend:
     container_name: matchbot-api
     restart: unless-stopped
@@ -44,7 +57,7 @@ services:
       - "./angular:/app"
       - "/app/node_modules"
     ports:
-      - 4001:4200
+      - 4002:4200
       - 49153:49153
     networks:
       - matchbot-network
