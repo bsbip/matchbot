@@ -45,7 +45,7 @@ services:
     ports:
       - "4002:9000"
     volumes:
-      - "./api:/var/www"
+      - "./api:/var/www/matchbot/api"
     networks:
       - matchbot-network
 
