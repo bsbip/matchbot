@@ -1,0 +1,11 @@
+FROM node:14 as base
+
+WORKDIR /usr/local/app
+
+COPY package*.json ./
+
+RUN npm install
+
+COPY . .
+
+CMD ["npm", "run", "build"]

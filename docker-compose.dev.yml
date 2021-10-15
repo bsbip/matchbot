@@ -1,0 +1,68 @@
+version: "3.8"
+
+services:
+  database:
+    image: mysql:5.7
+    container_name: matchbot-db
+    restart: unless-stopped
+    tty: true
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    ports:
+      - "4000:3306"
+    volumes:
+      - "./mysql/data:/var/lib/mysql/"
+    networks:
+      - matchbot-network
+
+  backend:
+    container_name: matchbot-api
+    restart: unless-stopped
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    environment:
+      DB_DATABASE: ${MYSQL_DATABASE}
+      DB_USER: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - "./api:/var/www"
+    networks:
+      - matchbot-network
+
+  frontend:
+    container_name: matchbot-angular
+    restart: unless-stopped
+    tty: true
+    build:
+      context: ./angular
+      dockerfile: Dockerfile.dev
+    volumes:
+      - "./angular:/app"
+      - "/app/node_modules"
+    ports:
+      - 4001:4200
+      - 49153:49153
+    networks:
+      - matchbot-network
+
+  webserver:
+    image: nginx:alpine
+    container_name: matchbot-nginx
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./api:/var/www
+      - ./nginx/:/etc/nginx/conf.d/
+    networks:
+      - matchbot-network
+
+networks:
+  matchbot-network:
+    driver: bridge
