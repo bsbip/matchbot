@@ -1,8 +1,10 @@
 FROM php:7.2-fpm
 
-COPY composer.lock composer.json /var/www/
+RUN mkdir -r /var/www/matchbot/api
 
-WORKDIR /var/www
+COPY composer.lock composer.json /var/www/matchbot/api/
+
+WORKDIR /var/www/matchbot/api
 
 RUN apt-get update && apt-get install -y \
     build-essential \
@@ -28,9 +30,9 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 RUN groupadd -g 1000 www
 RUN useradd -u 1000 -ms /bin/bash -g www www
 
-COPY . /var/www
+COPY . /var/www/matchbot/api
 
-RUN chown -R www:www /var/www
+RUN chown -R www:www /var/www/matchbot/api
 
 USER www
 

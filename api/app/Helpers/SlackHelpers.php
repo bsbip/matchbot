@@ -1,11 +1,11 @@
 <?php
-use Carbon\Carbon;
 use App\EventInitiation;
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Config;
-use Psr\Http\Message\ResponseInterface;
 use App\EventInitiationScheduledMessage;
+use Carbon\Carbon;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
+use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
@@ -192,8 +192,11 @@ function getSlackUserList(string $token): array
 
     try {
         $res = $client->get(env('SLACK_API_URL') . '/users.list', [
+            'headers' => [
+                'Content-Type' => 'application/json; charset=utf-8',
+                'Authorization' => 'Bearer ' . $token,
+            ],
             'query' => [
-                'token' => $token,
                 'pretty' => 1,
                 'presence' => 1,
             ],
@@ -226,8 +229,11 @@ function getSlackUser(string $userId): object
     $client = new \GuzzleHttp\Client();
 
     $res = $client->get(env('SLACK_API_URL') . '/users.info', [
+        'headers' => [
+            'Content-Type' => 'application/json; charset=utf-8',
+            'Authorization' => 'Bearer ' . env('SLACK_TOKEN'),
+        ],
         'query' => [
-            'token' => env('SLACK_TOKEN'),
             'pretty' => 1,
             'user' => $userId,
         ],
