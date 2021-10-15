@@ -17,7 +17,9 @@ RUN apt-get update && apt-get install -y \
     vim \
     unzip \
     git \
-    curl
+    curl \
+    cron \
+    supervisor
 
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
@@ -35,6 +37,12 @@ COPY . /var/www/matchbot/api
 RUN chown -R www:www /var/www/matchbot/api
 
 USER www
+
+RUN composer install
+
+RUN echo "* * * * * cd /var/www/matchbot/api && php artisan schedule:run >> /dev/null 2>&1" >> /etc/crontab
+
+COPY ./supervisor /etc/supervisor/conf.d
 
 EXPOSE 9000
 
