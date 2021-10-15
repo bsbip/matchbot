@@ -2,23 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use DB;
 use App\Event;
-use Exception;
-use Validator;
-use App\Player;
-use App\Result;
 use App\EventTeam;
-use Carbon\Carbon;
+use App\Jobs\CalculatePoints;
 use App\Jobs\CreateMatch;
 use App\Jobs\InitiateMatch;
-use Illuminate\Http\Request;
-use App\Jobs\CalculatePoints;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Config;
+use App\Player;
+use App\Result;
+use Carbon\Carbon;
+use DB;
+use Exception;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
+use Validator;
 
 /**
  * Actions for matches

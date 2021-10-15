@@ -1,70 +1,76 @@
 {
-    "name": "laravel/laravel",
-    "description": "The Laravel Framework.",
-    "keywords": ["framework", "laravel"],
-    "license": "MIT",
-    "type": "project",
-    "require": {
-        "php": ">=7.0.0",
-        "bugsnag/bugsnag-laravel": "^2.0",
-        "doctrine/dbal": "^2.5",
-        "fideloper/proxy": "~3.3",
-        "guzzlehttp/guzzle": "^6.2",
-        "laravel/framework": "5.5.*",
-        "laravel/tinker": "~1.0",
-        "predis/predis": "^1.1"
+  "name": "laravel/laravel",
+  "description": "The Laravel Framework.",
+  "keywords": [
+    "framework",
+    "laravel"
+  ],
+  "license": "MIT",
+  "type": "project",
+  "require": {
+    "php": ">=7.2.0",
+    "bugsnag/bugsnag-laravel": "^2.0",
+    "composer/composer": "^1.9",
+    "doctrine/annotations": "1.4.*",
+    "doctrine/cache": "1.6.*",
+    "doctrine/collections": "1.4.*",
+    "doctrine/dbal": "^2.9",
+    "fideloper/proxy": "^4.0",
+    "guzzlehttp/guzzle": "^6.2",
+    "laravel/framework": "^6.0.0",
+    "laravel/helpers": "^1.1",
+    "laravel/tinker": "~1.0",
+    "predis/predis": "^1.1"
+  },
+  "require-dev": {
+    "filp/whoops": "~2.0",
+    "fzaninotto/faker": "~1.4",
+    "mockery/mockery": "0.9.*",
+    "phpunit/phpunit": "~4.0",
+    "symfony/css-selector": "2.8.*|3.0.*",
+    "symfony/dom-crawler": "2.8.*|3.0.*",
+    "laracasts/generators": "^1.1",
+    "laracasts/testdummy": "~2.0"
+  },
+  "autoload": {
+    "classmap": [
+      "database/seeds",
+      "database/factories"
+    ],
+    "psr-4": {
+      "App\\": "app/"
     },
-    "require-dev": {
-        "filp/whoops": "~2.0",
-        "fzaninotto/faker": "~1.4",
-        "mockery/mockery": "0.9.*",
-        "phpunit/phpunit": "~4.0",
-        "symfony/css-selector": "2.8.*|3.0.*",
-        "symfony/dom-crawler": "2.8.*|3.0.*",
-        "laracasts/generators": "^1.1",
-        "laracasts/testdummy": "~2.0"
-    },
-    "autoload": {
-        "classmap": [
-            "database/seeds",
-            "database/factories"
-        ],
-        "psr-4": {
-            "App\\": "app/"
-        },
-        "files": [
-            "app/Helpers/UserHelpers.php",
-            "app/Helpers/SlackHelpers.php",
-            "app/Helpers/MatchHelpers.php"
-        ]
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Tests\\": "tests/"
-        }
-    },
-    "extra": {
-        "laravel": {
-            "dont-discover": [
-                
-            ]
-        }
-    },
-    "scripts": {
-        "post-root-package-install": [
-            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
-        ],
-        "post-create-project-cmd": [
-            "@php artisan key:generate"
-        ],
-        "post-autoload-dump": [
-            "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
-             "@php artisan package:discover"
-        ]
-    },
-    "config": {
-        "preferred-install": "dist",
-        "sort-packages": true,
-        "optimize-autoloader": true
+    "files": [
+      "app/Helpers/UserHelpers.php",
+      "app/Helpers/SlackHelpers.php",
+      "app/Helpers/MatchHelpers.php"
+    ]
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "tests/"
     }
+  },
+  "extra": {
+    "laravel": {
+      "dont-discover": []
+    }
+  },
+  "scripts": {
+    "post-root-package-install": [
+      "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
+    ],
+    "post-create-project-cmd": [
+      "@php artisan key:generate"
+    ],
+    "post-autoload-dump": [
+      "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
+      "@php artisan package:discover"
+    ]
+  },
+  "config": {
+    "preferred-install": "dist",
+    "sort-packages": true,
+    "optimize-autoloader": true
+  }
 }
