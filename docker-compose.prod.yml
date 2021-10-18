@@ -57,7 +57,7 @@ services:
       context: ./angular
       dockerfile: Dockerfile.prod
     volumes:
-      - "./angular:/app"
+      - "./angular:/var/www/matchbot/angular"
       - "/app/node_modules"
     networks:
       - matchbot-network
