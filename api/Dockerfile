@@ -1,6 +1,6 @@
 FROM php:7.2-fpm
 
-RUN mkdir -r /var/www/matchbot/api
+RUN mkdir -p /var/www/matchbot/api
 
 COPY composer.lock composer.json /var/www/matchbot/api/
 
@@ -29,21 +29,17 @@ RUN docker-php-ext-install gd
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-RUN groupadd -g 1000 www
-RUN useradd -u 1000 -ms /bin/bash -g www www
-
 COPY . /var/www/matchbot/api
 
-RUN chown -R www:www /var/www/matchbot/api
+RUN chown -R www-data:www-data /var/www/matchbot/api
+RUN chmod -R 755 /var/www/matchbot/api
 
-USER www
-
-RUN composer install
-
-RUN echo "* * * * * cd /var/www/matchbot/api && php artisan schedule:run >> /dev/null 2>&1" >> /etc/crontab
+COPY ./crontab/laravel /etc/cron.d/laravel
+RUN chmod 0644 /etc/cron.d/laravel
+RUN crontab /etc/cron.d/laravel
 
 COPY ./supervisor /etc/supervisor/conf.d
 
 EXPOSE 9000
 
-CMD ["php-fpm"]
+CMD bash -c "service supervisor start && cron && php-fpm"
