@@ -29,10 +29,15 @@ RUN docker-php-ext-install gd
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-COPY . /var/www/matchbot/api
+RUN groupadd -g 1000 www
+RUN useradd -u 1000 -ms /bin/bash -g www www
 
-RUN chown -R www-data:www-data /var/www/matchbot/api
-RUN chmod -R 755 /var/www/matchbot/api
+COPY . /var/www/matchbot/api
+COPY --chown=www:www . /var/www/matchbot/api
+
+RUN mkdir -p /var/www/matchbot/api/storage/logs
+RUN chown -R www:www /var/www/matchbot/api
+RUN chmod -R 775 /var/www/matchbot/api
 
 COPY ./crontab/laravel /etc/cron.d/laravel
 RUN chmod 0644 /etc/cron.d/laravel

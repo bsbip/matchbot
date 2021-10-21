@@ -42,7 +42,7 @@ services:
       DB_USER: ${MYSQL_USER}
       DB_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
-      - "./api:/var/www"
+      - "./api:/var/www/matchbot/api"
     networks:
       - matchbot-network
 
@@ -54,7 +54,7 @@ services:
       context: ./angular
       dockerfile: Dockerfile.dev
     volumes:
-      - "./angular:/app"
+      - "./angular:/var/www/matchbot/angular"
       - "/app/node_modules"
     ports:
       - 4002:4200
@@ -71,8 +71,9 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./api:/var/www
-      - ./nginx/:/etc/nginx/conf.d/
+      - "./api:/var/www/matchbot/api"
+      - "./angular:/var/www/matchbot/angular"
+      - "./nginx/:/etc/nginx/conf.d/"
     networks:
       - matchbot-network
 
