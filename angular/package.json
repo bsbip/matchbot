@@ -4,7 +4,7 @@
     "scripts": {
         "ng": "ng",
         "start": "ng serve --host 0.0.0.0 --proxy-config=proxy.conf.json",
-        "build": "ng build --max_old_space_size=512",
+        "build": "node --max_old_space_size=512 ./node_modules/@angular/cli/bin/ng build",
         "test": "ng test",
         "lint": "ng lint",
         "e2e": "ng e2e"
