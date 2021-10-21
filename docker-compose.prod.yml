@@ -51,6 +51,7 @@ services:
 
   frontend:
     container_name: matchbot-angular
+    restart: unless-stopped
     tty: true
     build:
       context: ./angular
