@@ -9,3 +9,9 @@ RUN npm install
 COPY . .
 
 RUN npm run build
+
+FROM nginx:alpine
+
+COPY --from=base /var/www/matchbot/angular /var/www/matchbot/angular
+
+EXPOSE 80

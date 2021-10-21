@@ -56,9 +56,8 @@ services:
     build:
       context: ./angular
       dockerfile: Dockerfile.prod
-    volumes:
-      - "./angular:/var/www/matchbot/angular"
-      - "/app/node_modules"
+    ports:
+      - "4003:80"
     networks:
       - matchbot-network
 
