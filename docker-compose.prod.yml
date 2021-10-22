@@ -57,7 +57,7 @@ services:
       context: ./angular
       dockerfile: Dockerfile.prod
     volumes:
-      - "./nginx:/etc/nginx/conf.d"
+      - "./nginx/frontend.prod.conf:/etc/nginx/conf.d/default.conf"
     ports:
       - "4003:80"
     networks:
