@@ -12,6 +12,6 @@ RUN npm run build
 
 FROM nginx:alpine
 
-COPY --from=base /var/www/matchbot/angular /var/www/matchbot/angular
+COPY --from=base /var/www/matchbot/angular/dist/matchbot /usr/share/nginx/html
 
 EXPOSE 80
