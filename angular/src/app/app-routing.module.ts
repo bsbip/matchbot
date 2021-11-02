@@ -4,42 +4,42 @@ import { Routes, RouterModule } from '@angular/router';
 const routes: Routes = [
     {
         path: '',
-        loadChildren: './pages/dashboard/dashboard.module#DashboardModule',
+        loadChildren: () => import('./pages/dashboard/dashboard.module').then(m => m.DashboardModule),
         data: {
             title: 'Matchbot',
         },
     },
     {
         path: 'match',
-        loadChildren: './pages/match/match.module#MatchModule',
+        loadChildren: () => import('./pages/match/match.module').then(m => m.MatchModule),
         data: {
             title: 'Match aanmaken',
         },
     },
     {
         path: 'players',
-        loadChildren: './pages/players/players.module#PlayersModule',
+        loadChildren: () => import('./pages/players/players.module').then(m => m.PlayersModule),
         data: {
             title: 'Spelers',
         },
     },
     {
         path: 'results',
-        loadChildren: './pages/results/results.module#ResultsModule',
+        loadChildren: () => import('./pages/results/results.module').then(m => m.ResultsModule),
         data: {
             title: 'Resultaten toevoegen',
         },
     },
     {
         path: 'standings',
-        loadChildren: './pages/standings/standings.module#StandingsModule',
+        loadChildren: () => import('./pages/standings/standings.module').then(m => m.StandingsModule),
         data: {
             title: 'Standen',
         },
     },
     {
         path: 'stats',
-        loadChildren: './pages/statistics/statistics.module#StatisticsModule',
+        loadChildren: () => import('./pages/statistics/statistics.module').then(m => m.StatisticsModule),
         data: {
             title: 'Statistieken',
         },
