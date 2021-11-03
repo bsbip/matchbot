@@ -1,10 +1,11 @@
-FROM node:14 as base
+FROM node:16 as base
 
 WORKDIR /var/www/matchbot/angular
 
-COPY package*.json ./
+COPY package.json ./
+COPY yarn.lock ./
 
-RUN npm install
+RUN yarn install
 
 COPY . .
 
