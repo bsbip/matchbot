@@ -17,22 +17,26 @@
                 "build": {
                     "builder": "@angular-devkit/build-angular:browser",
                     "options": {
-            "aot": true,
+                        "aot": true,
                         "outputPath": "dist/matchbot",
                         "index": "src/index.html",
                         "main": "src/main.ts",
                         "polyfills": "src/polyfills.ts",
                         "tsConfig": "src/tsconfig.app.json",
-                        "assets": ["src/favicon.ico", "src/assets"],
-                        "styles": ["src/styles.scss"],
+                        "assets": [
+                            "src/favicon.ico",
+                            "src/assets"
+                        ],
+                        "styles": [
+                            "src/styles.scss"
+                        ],
                         "stylePreprocessorOptions": {
                             "includePaths": [
                                 "node_modules/foundation-sites/scss/util",
                                 "src/assets/scss/foundation-sites"
                             ]
                         },
-                        "scripts": [],
-                        "es5BrowserSupport": true
+                        "scripts": []
                     },
                     "configurations": {
                         "production": {
