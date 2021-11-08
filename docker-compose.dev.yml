@@ -54,8 +54,7 @@ services:
       context: ./angular
       dockerfile: Dockerfile.dev
     volumes:
-      - "./angular:/var/www/matchbot/angular"
-      - "/app/node_modules"
+      - "./angular:/usr/local/app"
     ports:
       - 4002:4200
       - 49153:49153

@@ -2,12 +2,7 @@ FROM node:16 as base
 
 WORKDIR /usr/local/app
 
-COPY package.json ./
-COPY yarn.lock ./
-
 RUN yarn install
-
-COPY . .
 
 EXPOSE 4200 49153
 

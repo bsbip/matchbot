@@ -15,7 +15,7 @@ export class MatchComponent implements OnInit {
     public matchTypes: { name: string; code_name: string }[];
     public matchPlayers: {}[];
     public selectedPlayers = [];
-    protected createMatchAllowed = true;
+    public createMatchAllowed = true;
 
     constructor(private httpService: HttpService) {
         this.matchTypes = [
@@ -47,7 +47,7 @@ export class MatchComponent implements OnInit {
      */
     public getUsers(): void {
         this.httpService.get('users/slack').subscribe(
-            data => {
+            (data) => {
                 this.users = data;
 
                 // Add default users to list of selected players
@@ -57,7 +57,7 @@ export class MatchComponent implements OnInit {
                     }
                 }
             },
-            error => console.error(error),
+            (error) => console.error(error),
             () => {}
         );
     }
@@ -70,12 +70,12 @@ export class MatchComponent implements OnInit {
     public createMatch(): void {
         this.loading = true;
         this.httpService.post('match', this.matchPlayers).subscribe(
-            data => {
+            (data) => {
                 this.resResult = data;
                 this.resResult.success = true;
                 this.matchPlayers = [{}, {}, {}, {}];
             },
-            error => {
+            (error) => {
                 this.resResult.success = false;
                 this.resResult.error = true;
 
@@ -103,11 +103,11 @@ export class MatchComponent implements OnInit {
         this.httpService
             .post('slack/match', { users: this.selectedPlayers })
             .subscribe(
-                data => {
+                (data) => {
                     this.resResult = data;
                     this.resResult.success = true;
                 },
-                error => {
+                (error) => {
                     this.resResult.success = false;
                     this.resResult.error = true;
                     this.resResult.msg = error.error.msg;

@@ -2,7 +2,7 @@ export type ApiResponse<T> = {
     error?: boolean;
     msg?: string;
     success?: boolean;
-    errors?: object[];
+    errors?: any[];
     data?: T[];
 };
 

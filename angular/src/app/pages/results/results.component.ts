@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpService } from 'src/app/services/http.service';
 import { ActivatedRoute } from '@angular/router';
+import { HttpService } from 'src/app/services/http.service';
 import { ApiResponse } from 'src/app/types/api-response';
 
 @Component({
@@ -32,9 +32,10 @@ export class ResultsComponent implements OnInit {
      * @author Ramon Bakker
      */
     public ngOnInit(): void {
-        this._routeParams.params.subscribe(params => {
+        this._routeParams.params.subscribe((params) => {
             this.id = +params.id;
         });
+
         this.getEvents(this.editResults);
     }
 
@@ -55,7 +56,7 @@ export class ResultsComponent implements OnInit {
         }
 
         this.httpService.get(`events/${this.statusType}`).subscribe(
-            data => {
+            (data) => {
                 this.events = data;
                 this.index = 0;
 
@@ -72,7 +73,7 @@ export class ResultsComponent implements OnInit {
                     this.selectEvent(this.index);
                 }
             },
-            error => console.error(error)
+            (error) => console.error(error)
         );
     }
 
@@ -95,39 +96,34 @@ export class ResultsComponent implements OnInit {
                 if (
                     this.events[index].event_teams[0].result.score !== undefined
                 ) {
-                    this.results['scoreTeam1'] = this.events[
-                        index
-                    ].event_teams[0].result.score;
+                    this.results['scoreTeam1'] =
+                        this.events[index].event_teams[0].result.score;
                 }
                 if (
                     this.events[index].event_teams[0].result.crawl_score !==
                     undefined
                 ) {
-                    this.results['crawlsTeam1'] = this.events[
-                        index
-                    ].event_teams[0].result.crawl_score;
+                    this.results['crawlsTeam1'] =
+                        this.events[index].event_teams[0].result.crawl_score;
                 }
                 if (
                     this.events[index].event_teams[1].result.score !== undefined
                 ) {
-                    this.results['scoreTeam2'] = this.events[
-                        index
-                    ].event_teams[1].result.score;
+                    this.results['scoreTeam2'] =
+                        this.events[index].event_teams[1].result.score;
                 }
                 if (
                     this.events[index].event_teams[1].result.crawl_score !==
                     undefined
                 ) {
-                    this.results['crawlsTeam2'] = this.events[
-                        index
-                    ].event_teams[1].result.crawl_score;
+                    this.results['crawlsTeam2'] =
+                        this.events[index].event_teams[1].result.crawl_score;
                 }
                 if (
                     this.events[index].event_teams[0].result.note !== undefined
                 ) {
-                    this.results['note'] = this.events[
-                        index
-                    ].event_teams[0].result.note;
+                    this.results['note'] =
+                        this.events[index].event_teams[0].result.note;
                 }
             }
         }
@@ -194,7 +190,7 @@ export class ResultsComponent implements OnInit {
         this.httpService
             .post(`match/result/${this.editResults}`, this.results)
             .subscribe(
-                data => {
+                (data) => {
                     this.resResult = data;
                     this.resResult.success = true;
                     // Reset
@@ -209,7 +205,7 @@ export class ResultsComponent implements OnInit {
                         this.selectEvent(this.index);
                     }
                 },
-                error => {
+                (error) => {
                     this.resResult.success = false;
                     this.resResult.error = true;
 
@@ -245,7 +241,7 @@ export class ResultsComponent implements OnInit {
 
         this.loading = true;
         this.httpService.delete(`match/result/${this.results['id']}`).subscribe(
-            data => {
+            (data) => {
                 this.resResult = data;
                 this.resResult.success = true;
                 // Reset
@@ -260,7 +256,7 @@ export class ResultsComponent implements OnInit {
                     this.selectEvent(this.index);
                 }
             },
-            error => {
+            (error) => {
                 this.resResult.success = false;
                 this.resResult.error = true;
 
