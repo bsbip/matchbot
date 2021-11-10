@@ -1,50 +1,105 @@
-<header>
-    <div class="grid-container">
-        <div>
-            <nav class="nav">
-                <ul class="vertical medium-horizontal menu">
-                    <li class="menu-text">
-                        <a [routerLink]="''" routerLinkActive="active"
-                            ><img
-                                [src]="
-                                    baseUrl + '/assets/img/matchbot-icon.jpg'
-                                "
-                                alt="Matchbot"
-                            />
-                            Matchbot</a
-                        >
-                    </li>
-                    <li>
-                        <a [routerLink]="'/players'" routerLinkActive="active"
-                            >Spelers</a
-                        >
-                    </li>
-                    <li>
-                        <a [routerLink]="'/match'" routerLinkActive="active"
-                            >Match aanmaken</a
-                        >
-                    </li>
-                    <li>
-                        <a [routerLink]="'/results'" routerLinkActive="active"
-                            >Resultaten toevoegen</a
-                        >
-                    </li>
-                    <li>
-                        <a [routerLink]="'/stats'" routerLinkActive="active"
-                            >Statistieken</a
-                        >
-                    </li>
-                    <li>
-                        <a [routerLink]="'/standings'" routerLinkActive="active"
-                            >Standen</a
-                        >
-                    </li>
-                </ul>
-            </nav>
+<header class="py-5 shadow-lg">
+    <nav>
+        <div
+            class="
+                flex flex-row
+                justify-between
+                container
+                px-5
+                my-auto
+                items-center
+                w-100
+                md:mx-auto
+            "
+        >
+            <a
+                class="flex flex-row items-center"
+                [routerLink]="''"
+                routerLinkActive="active"
+            >
+                <img
+                    class="mr-5"
+                    [src]="baseUrl + '/assets/img/matchbot-icon.jpg'"
+                    alt="Matchbot"
+                />
+
+                <span class="font-sans">Matchbot</span>
+            </a>
+
+            <div class="hidden md:flex flex-row space-x-5">
+                <a [routerLink]="'/players'" routerLinkActive="active"
+                    >Spelers</a
+                >
+
+                <a [routerLink]="'/match'" routerLinkActive="active"
+                    >Match aanmaken</a
+                >
+
+                <a [routerLink]="'/results'" routerLinkActive="active"
+                    >Resultaten toevoegen</a
+                >
+
+                <a [routerLink]="'/stats'" routerLinkActive="active"
+                    >Statistieken</a
+                >
+
+                <a [routerLink]="'/standings'" routerLinkActive="active"
+                    >Standen</a
+                >
+            </div>
+
+            <div class="md:hidden flex items-center">
+                <button class="outline-none mobile-menu-button">
+                    <svg
+                        class="w-6 h-6 text-gray-500"
+                        x-show="!showMenu"
+                        fill="none"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <ul class="hidden">
+                <li>
+                    <a [routerLink]="'/players'" routerLinkActive="active"
+                        >Spelers</a
+                    >
+                </li>
+
+                <li>
+                    <a [routerLink]="'/match'" routerLinkActive="active"
+                        >Match aanmaken</a
+                    >
+                </li>
+
+                <li>
+                    <a [routerLink]="'/results'" routerLinkActive="active"
+                        >Resultaten toevoegen</a
+                    >
+                </li>
+
+                <li>
+                    <a [routerLink]="'/stats'" routerLinkActive="active"
+                        >Statistieken</a
+                    >
+                </li>
+
+                <li>
+                    <a [routerLink]="'/standings'" routerLinkActive="active"
+                        >Standen</a
+                    >
+                </li>
+            </ul>
         </div>
-    </div>
+    </nav>
 </header>
 
-<div class="grid-container">
+<div class="container mx-5 my-5 md:mx-auto">
     <router-outlet></router-outlet>
 </div>
